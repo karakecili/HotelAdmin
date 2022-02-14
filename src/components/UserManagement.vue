@@ -1,0 +1,296 @@
+<template>
+    <div class="container" style="margin-top: 5px; margin-bottom: 5px;">
+        <table class="table table-hover table-striped table-bordered" v-if="!isEdit">
+            <thead>
+                <td>Kullanıcı</td>
+                <td>Ad-Soyad</td>
+                <td>Mail</td>
+                <td>Telefon</td>
+                <td>Rol
+                    <select name="" id="slct_role" @change="getUsersList" v-model="searchData.RoleId"> 
+                        <option selected  value="null">Hepsi</option>
+                        <option v-for="role in getRoleList" :value="role.RoleId" :key="role.RoleId">{{ role.RoleName }}
+                        </option>
+                    </select>
+                </td>
+                <td>Kayıt Tarihi</td>
+                <!-- <td>Aktiflik</td> -->
+                <td>Son İşlem Tarihi</td>
+                <td>İşlem
+                    <button class="btn-primary" style="border-radius: 12px; border: solid 2px #0d6efd; background-color: #007bff" title="Yeni Kullanıcı" @click="openNew">
+                        <i class="fa fa-user-plus" aria-hidden="true"></i>
+                    </button>
+                </td>
+            </thead>
+            <tbody>
+                <tr v-for="User in getUserList" :key="User.UserId">
+                    <td> {{ User.UserName }} </td>
+                    <td> {{ User.FirstName + " " + User.LastName  }} </td>
+                    <td> {{ User.Mail }} </td>
+                    <td> {{ User.PhoneNumber | formatToPhone }} </td>
+                    <td> {{ getRoleById(User.RoleId).RoleName }} </td>
+                    <td> {{ User.RegisterDate | formatDate }} </td>
+                    <!-- <td> {{ User.Activity | formatToBool }} </td> -->
+                    <td> {{ User.DB_Datetime | formatDate }} </td>
+                    <td>
+                        <button class="btn-secondary btn-icon" style="border-radius: 12px; margin-right: 5px; border: solid 2px #6c757d;" title="Düzenle" @click="openEdit(User)">
+                            <i class="fa fa-user-edit" aria-hidden="true"></i>
+                        </button>
+                        <button :class="User.DB_Action == 0 ? 'btn-success' : 'btn-danger'" :title="User.DB_Action == 0 ? 'Aktife Al' : 'Pasife Al'"
+                            :style="User.DB_Action == 0 ? 'border-radius: 12px; border: solid 2px #198754;' : 'border-radius: 12px; border: solid 2px #dc3545'" 
+                            @click="SetActivePassive(User.DB_Action == 0, User.UserId)">
+                            <!-- <i :class="User.DB_Action == 0 ? 'fa fa-check' : 'fa fa-times'" aria-hidden="true" ></i> -->
+                            <span v-show="User.DB_Action == 0"><i class="fa fa-user-check" aria-hidden="true"></i></span>
+                            <span v-show="User.DB_Action != 0"><i class="fa fa-user-times" aria-hidden="true"></i></span>
+                        </button>
+                        <!-- <button class="btn-danger" style="border-radius: 12px; border: solid 2px #dc3545;" title="Pasife Al" @click="SetActivePassive(false, User.UserId)" v-else>
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                        </button> -->
+                    </td>
+                </tr>
+                <tr v-if="getUserList.length == 0">
+                    <td colspan="8" style="background-color: #fff4d0; color: #664d03;">
+                        <div class="alert" style="background-color: #f2e8c5; border-color: #f2e8c5; color: #664d03; text-align: center;">
+                            <strong>Filtreye Uygun Bir Kayıt Bulunamadı</strong>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <b-form @submit="onSubmit" @reset="onReset" v-else>
+            <b-form-group
+                id="input-group-1"
+                label="Kullanıcı Adı:"
+                label-for="input-1"
+                description="Kullanıcı Adı Zorunludur."
+            >
+                <b-form-input
+                    id="input-1"
+                    v-model="Form.UserName"
+                    placeholder="Kullanıcı Adı Giriniz"
+                    :disabled="!isNew"
+                    required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group
+                id="input-group-11"
+                label="Mail:"
+                label-for="input-11"
+                description="Mail Adresi Alanı Zorunludur."
+            >
+                <b-form-input
+                    id="input-11"
+                    v-model="Form.Mail"
+                    type="email"
+                    placeholder="Mail Giriniz"
+                    :disabled="!isNew"
+                    required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group id="input-group-21" label="Parola:" label-for="input-21">
+                <b-form-input
+                    id="input-21"
+                    type="password"
+                    v-model="Form.Password"
+                    placeholder="Parola Giriniz"
+                    required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group id="input-group-2" label="Ad:" label-for="input-2">
+                <b-form-input
+                    id="input-2"
+                    v-model="Form.FirstName"
+                    placeholder="Ad Giriniz"
+                    required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group id="input-group-3" label="Soyad:" label-for="input-3">
+                <b-form-input 
+                    id="input-3"
+                    v-model="Form.LastName"
+                    placeholder="Soyad Giriniz"
+                    required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group id="input-group-4" label="Doğum Tarihi:" label-for="input-4">
+                <b-form-datepicker 
+                    id="input-4" 
+                    class="mb-2" 
+                    placeholder="Tarih Giriniz"
+                    locale="tr"
+                    :start-weekday="1"
+                    :label-help="'Takvim tarihlerinde gezinmek için imleç tuşlarını kullanınız'"
+                    :show-decade-nav="true"
+                    :hide-header="true"
+                    @input="Form.DateOfBirth = $refs.birthdate.localYMD"
+                    ref="birthdate"
+                ></b-form-datepicker>
+            </b-form-group>
+
+            <b-form-group id="input-group-31" label="Telefon:" label-for="input-31">
+                <b-form-input 
+                    id="input-31"
+                    type="text"
+                    v-model="Form.PhoneNumber"
+                    @change="formatPhone"
+                    placeholder="Telefon Giriniz"
+                    required
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group id="input-group-6" label="Mülk:" label-for="input-6">
+
+            </b-form-group>
+
+            <b-form-group id="input-group-5" label="Rol:" label-for="input-5">
+                <b-form-select
+                    id="input-5"
+                    v-model="Form.RoleId"
+                    required
+                >
+                    <option selected  value="">Lütfen Rol Seçiniz</option>
+                    <option v-for="role in getRoleList" :value="role.RoleId" :key="role.RoleId">{{ role.RoleName }}
+                    </option>
+                </b-form-select>
+            </b-form-group>
+
+            <b-button type="submit" variant="primary" style="margin-right: 5px;">Gönder</b-button>
+            <b-button type="reset" variant="warning" v-if="isNew" style="margin-right: 5px;">Temizle</b-button>
+            <b-button variant="danger" style="margin-right: 5px;" @click="openList">İptal</b-button>
+        </b-form>
+    </div>
+</template>
+
+<script>
+    import {mapGetters} from "vuex";
+
+    export default {
+        data() {
+            return {
+                searchData: {
+                    UserId: null,
+                    UserName: '',
+                    Mail: '',
+                    Name: '',
+                    RoleId: null,
+                    isActivated: null,
+                },
+                isEdit: false,
+                isNew: false,
+                Form: {
+                    UserId: null,
+                    UserName: '',
+                    Password: '',
+                    Mail: '',
+                    FirstName: '',
+                    LastName: '',
+                    DateOfBirth: null,
+                    Address: '',
+                    PhoneNumber: '',
+                    RoleId: '',
+                },
+            }
+        },
+        filters: {
+            formatDate: function (value){
+                var d = new Date(value)
+                return d.toLocaleString()
+            },
+            formatToBool: function (value){
+                return value == 1 ? "Evet" : "Hayır"
+            },
+            formatToPhone: function (value){
+                // return value
+                var x = value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                return !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+                
+            },
+        },
+        computed: {
+            ...mapGetters(["getUserList"]),
+            ...mapGetters(["getRoleList"]),
+        },
+        created() {
+            this.getUsersList()
+        },
+        methods: {
+            formatPhone() {
+                var x = this.Form.PhoneNumber.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                this.Form.PhoneNumber = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            },
+            getUsersList() {
+                this.$store.dispatch("getUsersList", { ...this.searchData })
+            },
+            getRolesList() {
+                this.$store.dispatch("getRolesList", { ...this.searchData })
+            },
+            getRoleById(id) {
+                return this.$store.getters.getRoleById(id);
+            },
+            openEdit(User) {
+                this.Form.UserId = User.UserId
+                this.Form.UserName = User.UserName
+                this.Form.Mail = User.Mail
+                this.Form.Password = User.Password
+                this.Form.FirstName = User.FirstName
+                this.Form.LastName = User.LastName
+                this.Form.DateOfBirth = User.DateOfBirth.substring(0, 10)
+                this.Form.PhoneNumber = User.PhoneNumber
+                this.Form.RoleId = User.RoleId
+                this.isEdit=true
+                this.isNew=false
+                // this.$refs.birthdate.localYMD = User.DateOfBirth.substring(0, 10)
+            },
+            openNew() {
+                this.isEdit=true
+                this.isNew=true
+                this.onReset()
+            },
+            onReset() {
+                this.Form = {
+                    UserId: null,
+                    UserName: '',
+                    Password: '',
+                    Mail: '',
+                    FirstName: '',
+                    LastName: '',
+                    DateOfBirth: null,
+                    Address: '',
+                    PhoneNumber: '',
+                    RoleId: '',
+                }
+                if(this.$refs.birthdate != undefined) {
+                    this.$refs.birthdate.localYMD = ''
+                }
+                // this.$refs.birthdate.formattedValue = ''
+            },
+            openList() {
+                this.getUsersList()
+                this.isEdit=false
+                this.isNew=false
+            },
+            onSubmit() {
+                this.Form.PhoneNumber = this.Form.PhoneNumber.replace(/\D/g,'')
+                this.$store.dispatch("UpdateUser", { ...this.Form })
+                    .then(() =>{
+                            this.isEdit=false
+                            this.isNew=false 
+                            this.getUsersList()
+                        }
+                    )
+            },
+            SetActivePassive(Active, ID) {
+                this.$store.dispatch("SetActivePassive", { Active, ID })
+                    .then(() =>{
+                            this.getUsersList() 
+                        }
+                    )
+            }
+        },
+    }
+</script>
