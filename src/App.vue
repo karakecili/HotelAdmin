@@ -140,4 +140,20 @@
     .loginForm {
         margin-bottom: 1rem;
     }
+    .PosStatus {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 0;
+        padding: 10px;
+    }
+    .PosInfo {
+        
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .listImage {
+        width: 250px;
+    }
 </style>

@@ -77,14 +77,16 @@
                                 title: "Restaurantlar",
                                 icon: "m2 fa fa-utensils",
                                 module: "ListRestaurants",
-                                tableName: "Tbl_Restaurant"
+                                tableName: "Tbl_Restaurant",
+                                imagePath: "restaurants"
                             },
                             {
                                 href: "/modules/hotel",
                                 title: "Hoteller",
                                 icon: "m2 fa fa-hotel",
                                 module: "ListMansion",
-                                tableName: "Tbl_Mansion"
+                                tableName: "Tbl_Mansion",
+                                imagePath: "hotels"
                             },
                         ],
                     },
@@ -113,9 +115,19 @@
                     this.$store.state.CurrentTable = i.tableName == undefined ? this.$store.state.CurrentTable : i.tableName
 
                     if(i.module != undefined) {
-                        this.$store.dispatch("ListFields", i.tableName)
-                        this.$store.dispatch(i.module)
                         this.$store.state.CurrentPK = i.tableName.substring(4) + 'Id'
+                        this.$store.commit("AssignModuleInfo", {
+                            CurrentTable: i.tableName,
+                            CurrentPK: i.tableName.substring(4) + 'Id',
+                            CurrentImagePath: i.imagePath ?? '',
+                            CurrentModule: i.module
+                        })
+                        
+                        this.$store.dispatch("ListFields", i.tableName)
+                            .then(() => {
+                                this.$store.dispatch(i.module)
+                            })
+                            
                     }
                 }
             },
@@ -123,6 +135,16 @@
                 this.collapsed = c;
             },
         },
+        watch: {
+            $route: {
+                immediate: true,
+                handler(to, from) {
+                    console.log(to)
+                    console.log(from)
+
+                }
+            }
+        }
     };
 </script>
 

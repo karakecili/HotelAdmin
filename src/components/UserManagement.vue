@@ -189,6 +189,7 @@
                     Mail: '',
                     FirstName: '',
                     LastName: '',
+                    Language: 'tr',
                     DateOfBirth: null,
                     Address: '',
                     PhoneNumber: '',
@@ -198,7 +199,7 @@
         },
         filters: {
             formatDate: function (value){
-                var d = new Date(value)
+                let d = new Date(value)
                 return d.toLocaleString()
             },
             formatToBool: function (value){
@@ -206,7 +207,7 @@
             },
             formatToPhone: function (value){
                 // return value
-                var x = value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                let x = value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
                 return !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
                 
             },
@@ -220,7 +221,7 @@
         },
         methods: {
             formatPhone() {
-                var x = this.Form.PhoneNumber.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                let x = this.Form.PhoneNumber.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
                 this.Form.PhoneNumber = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
             },
             getUsersList() {
@@ -239,6 +240,7 @@
                 this.Form.Password = User.Password
                 this.Form.FirstName = User.FirstName
                 this.Form.LastName = User.LastName
+                this.Form.Language = User.Language
                 this.Form.DateOfBirth = User.DateOfBirth.substring(0, 10)
                 this.Form.PhoneNumber = User.PhoneNumber
                 this.Form.RoleId = User.RoleId
@@ -259,6 +261,7 @@
                     Mail: '',
                     FirstName: '',
                     LastName: '',
+                    Language: 'tr',
                     DateOfBirth: null,
                     Address: '',
                     PhoneNumber: '',

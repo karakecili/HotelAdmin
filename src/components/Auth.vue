@@ -9,12 +9,20 @@
                 <form @submit.prevent="onSubmit">
                     <div class="loginForm">
                         <label>E-posta Adresiniz</label>
-                        <input v-model="user.email" type="email" class="form-control"
-                               placeholder="E-posta adresinizi giriniz">
+                        <input 
+                            v-model="user.email" 
+                            class="form-control"
+                            placeholder="Kullanıcı adı veya E-posta adresinizi giriniz"
+                        >
                     </div>
                     <div class="loginForm" :style="{visibility: !isForgotten ? 'visible' : 'hidden'}">
                         <label>Şifre</label>
-                        <input v-model="user.password" type="password" class="form-control" placeholder="Şifreniz...">
+                        <input 
+                            v-model="user.password" 
+                            type="password" 
+                            class="form-control" 
+                            placeholder="Şifreniz..."
+                        >
                     </div>
                     <div class="button-container d-flex  flex-column align-items-center">
                         <!-- <button type="submit" :class="{'btn-primary' : isUser, 'btn-success' : !isUser }"

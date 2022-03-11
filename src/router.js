@@ -74,5 +74,5 @@ export const router = new VueRouter({
         },
         {path: "/auth", component: Auth}
     ],
-    mode: "history"
+    // mode: "history"
 });

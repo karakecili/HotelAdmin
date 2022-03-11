@@ -33,6 +33,7 @@ const store = new Vuex.Store({
             { PossessionStatus: 3, PossessionName: "Firma Sahip Satılık" }, 
             { PossessionStatus: 4, PossessionName: "Firma Sahip Kiralık" }, 
             { PossessionStatus: 5, PossessionName: "Firma Sahip Ziyaretlik" }, 
+            { PossessionStatus: 6, PossessionName: "Kullanım Dışı" }, 
         ],
         OrderInfo: [],
         OrderLog: [],
@@ -44,6 +45,8 @@ const store = new Vuex.Store({
         Mansions: [],
         Blocks: [],
         Possessions: [],
+        PossessionInfo: {},
+        RequestList: [],
         DB_Action: [
             { ActionId: 1, Action: "Yeni İşlem" },
             { ActionId: 2, Action: "Düzenlendi" },
@@ -53,7 +56,9 @@ const store = new Vuex.Store({
         District: [],
         Vehicles: [ "Araç", "Tekne" ],
         CurrentTable: "",
-        CurrentPK: ""
+        CurrentPK: "",
+        CurrentImagePath: "",
+        CurrentModule: "",
     },
     mutations: {
         setSession(state, data){
@@ -101,6 +106,20 @@ const store = new Vuex.Store({
         updatePossessions(state, item) {
             state.Possessions.push(item);
         },
+        updatePossessionInfo(state, item) {
+            state.PossessionInfo = item;
+        },
+        updateRequestList(state, item) {
+            state.RequestList.push(item);
+        },
+        AssignModuleInfo(state, data) {
+            state.Fields = []
+            state.ModuleData = []
+            state.CurrentTable = data.CurrentTable
+            state.CurrentPK = data.CurrentPK
+            state.CurrentImagePath = data.CurrentImagePath
+            state.CurrentModule = data.CurrentModule
+        }
 
     },
     actions: {
@@ -111,9 +130,10 @@ const store = new Vuex.Store({
                 axios.get("Session/AdminSessionControl?" + "SessionKey=" + SessionKey)
                     .then(response => {
                         if(response.data) {
-                            var SessionData = []
-                            SessionData.push({ RoleId: localStorage.getItem("RoleId"), Session: localStorage.getItem("Session"), UserId: localStorage.getItem("UserId")});
-                            commit("setSession", SessionData[0])
+                            commit("setSession", { 
+                                RoleId: localStorage.getItem("RoleId"), 
+                                Session: localStorage.getItem("Session"), 
+                                UserId: localStorage.getItem("UserId")})
 
                             dispatch("getRolesList")
                             dispatch("getAdminsList")
@@ -276,7 +296,7 @@ const store = new Vuex.Store({
         },
         UpdateUser({ state }, updateData ){
             return axios.post("User/UpdateUser?" + "UserId=" + updateData.UserId + "&UserName=" + updateData.UserName + "&Password=" + updateData.Password + 
-                "&Mail=" + updateData.Mail + "&FirstName=" + updateData.FirstName + "&LastName=" + updateData.LastName + 
+                "&Mail=" + updateData.Mail + "&FirstName=" + updateData.FirstName + "&LastName=" + updateData.LastName + "&Language=" + updateData.Language +
                 "&DateOfBirth=" + updateData.DateOfBirth + "&Address=" + updateData.Address + "&PhoneNumber=" + updateData.PhoneNumber + 
                 "&RoleId=" + updateData.RoleId + "&DB_User=" + state.loginUserId + "&SessionKey=" + state.SessionKey)
         },
@@ -288,8 +308,8 @@ const store = new Vuex.Store({
         },
 
         //Modüller
-        ListFields({ commit, state }, tableName){
-            axios.get("Module/ListFields?" + "tableName=" + tableName)
+        ListFields({ commit, state, dispatch }, tableName){
+            return axios.get("Module/ListFields?" + "tableName=" + tableName)
                 .then(response => {
                     state.Fields = []
                     let data = response.data;
@@ -298,6 +318,8 @@ const store = new Vuex.Store({
                         data[row].key = data[row].keyValue;
                         commit("updateFields", data[row]);
                     }
+                    
+                    dispatch(state.CurrentModule)
             })
         },
         ListProvinces({ commit, state }){
@@ -370,6 +392,31 @@ const store = new Vuex.Store({
                     }
             })
         },
+        UpdateModule({ state, dispatch }, payload){
+            return axios.post("Module/Update?tableName=" + state.CurrentTable + "&updateInfo=" + payload.updateInfo + "&SessionKey=" + state.SessionKey)
+                .then(response => {
+                    state.ModuleData = []
+                    let data = response.data;
+                    
+                    dispatch(state.CurrentModule)
+
+                    return data
+            })
+        },
+        NewModule({ state, dispatch }, payload){
+            return axios.post("Module/New?tableName=" + state.CurrentTable + "&insertInfo=" + payload.insertInfo + "&SessionKey=" + state.SessionKey)
+                .then(response => {
+                    state.ModuleData = []
+                    let data = response.data;
+                    
+                    dispatch(state.CurrentModule)
+
+                    return data
+            })
+        },
+        AddPicture({ state }, image) {
+            return axios.post("Module/AddPicture?image=" + image.url + "&SessionKey=" + state.SessionKey)
+        },
 
         //Mülk Sayfası
         ListMansions({ commit, state }){
@@ -408,6 +455,29 @@ const store = new Vuex.Store({
         },
         AddBlock({ state }, payload) {
             return axios.post("Property/AddBlock?MansionId=" + payload.MansionId + "&Name=" + payload.BlockName + "&SessionKey=" + state.SessionKey)
+        },
+        PossessionInfo({ commit, state }, PossessionId) {
+            axios.get("Property/PossessionInfo?PossessionId=" + PossessionId + "&SessionKey=" + state.SessionKey)
+                .then(response => {
+                    let data = response.data
+                    commit("updatePossessionInfo", data)
+                })
+        },
+        RequestList({ commit, state }, payload) {
+            axios.get("Property/RequestList?PossessionId=" + payload.PossessionId + "&MansionId=" + payload.MansionId + "&SessionKey=" + state.SessionKey)
+                .then(response => {
+                    state.RequestList = []
+                    let data = response.data;
+                    for (let key in data) {
+                        commit("updateRequestList", data[key]);
+                    }
+                })
+        },
+        AcceptRequest({ state }, AvailableId) {
+            return axios.post("Property/AcceptRequest?AvailableId=" + AvailableId + "&SessionKey=" + state.SessionKey)
+        },
+        RejectRequest({ state }, AvailableId) {
+            return axios.post("Property/RejectRequest?AvailableId=" + AvailableId + "&SessionKey=" + state.SessionKey)
         },
     },
     getters: {
@@ -490,6 +560,20 @@ const store = new Vuex.Store({
         getPossessionStatus(state){
             return state.PossessionStatus;
         },
+        getPossessionInfo(state){
+            return state.PossessionInfo;
+        },
+        getRequestList(state){
+            return state.RequestList;
+        },
+        GetModuleInfo(state) {
+            return {
+                CurrentTable: state.CurrentTable,
+                CurrentPK: state.CurrentPK,
+                CurrentImagePath: state.CurrentImagePath,
+                CurrentModule: state.CurrentModule,
+            };
+        }
     }
 })
 

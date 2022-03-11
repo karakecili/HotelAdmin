@@ -8,6 +8,7 @@
         <div v-else-if="!possessionSelected" class="divPost">
             <div class="divPosHeader">
                 <b-button class="btn btn-danger" @click="mansionSelected=!mansionSelected">Geri</b-button>
+                <b-button class="btn btn-primary" @click="selectMansion(Possession.MansionId)">Onay Listesi</b-button>
                 <span class="spnMansionInfo"> {{ MansionInfo }} </span>
                 <b-button class="btn btn-success" v-b-modal.modalRoom>Yeni Oda</b-button>
                 <b-button class="btn btn-success" v-b-modal.modalBlock v-if="selectedRow.IsBlocky">Yeni Blok</b-button>
@@ -18,19 +19,83 @@
                         
                         <span> {{ Block.Name + ' (' + getPossessionsByBlock(Block.BlockId).length + ' Oda)' }} </span>
                         <div class="PosButtonList">
-                            <button v-for="Possession in getPossessionsByBlock(Block.BlockId)" :key="Possession.PossessionId" class="PosButton"> {{ Possession.No }} </button>
+                            <button 
+                                v-for="Possession in getPossessionsByBlock(Block.BlockId)" 
+                                :key="Possession.PossessionId" 
+                                class="PosButton" 
+                                @click="selectPossession(Possession.PossessionId, Possession.MansionId)"
+                            > {{ Possession.No }} </button>
                         </div>
                     </div>
 
                 </div>
-                <button v-else v-for="Possession in getPossessions" :key="Possession.PossessionId" class="PosButton"> {{ Possession.No }} </button>
+                <button 
+                    v-else 
+                    v-for="Possession in getPossessions" 
+                    :key="Possession.PossessionId" 
+                    class="PosButton"
+                    @click="selectPossession(Possession.PossessionId, Possession.MansionId)"
+                > {{ Possession.No }} </button>
             </div>
 
         </div>
         <div v-else>
-            <b-form>
-                 
-            </b-form>
+            <div class="divPosHeader">
+                <b-button class="btn btn-danger" @click="possessionSelected=!possessionSelected">Geri</b-button>
+                <span class="spnMansionInfo">
+                    <div v-if="IsPossession">
+                        {{ getPossessionInfo.Mansion + " " + (getPossessionInfo.Block == "" ? "" : "Blok: " + getPossessionInfo.Block + " ") + "Oda: " + getPossessionInfo.No }} 
+                    </div>
+                    <div v-else>
+                        {{ MansionInfo }} 
+                    </div>
+                </span>
+            </div>
+            <div class="PosStatus" v-if="IsPossession">
+                <div class="PosInfo">
+                    <span>{{ "Mülk Sahibi: " + getPossessionInfo.OwnerInfo.UserName + " (" + getPossessionInfo.OwnerInfo.FirstName + " " + getPossessionInfo.OwnerInfo.LastName + ")" }}</span>
+                    <span>{{ "Mülk Statüsü: " + getPossessionInfo.PossessionTypeDesc }}</span>
+                </div>
+                <div class="PosBooked" v-if="getPossessionInfo.BookingInfo">
+                    {{ "Kiracı Bilgisi: " + getPossessionInfo.BookedInfo.UserName + " (" + getPossessionInfo.BookedInfo.FirstName + " " + getPossessionInfo.BookedInfo.LastName + ")" }}
+                    {{ "Kira Süresi:    " + (getPossessionInfo.BookingInfo.BeginDate | formatDate) + " - " + (getPossessionInfo.BookingInfo.EndDate | formatDate) }}
+                </div>
+            </div>
+            <div class="PosRequests">
+                <b>Gelen Talepler</b>
+                <b-table striped hover :items="getRequestList" :fields="PosFields" @row-clicked="selectRow" >
+
+                    <template #cell(Phone)="row">
+                        {{ row.value | formatToPhone }}
+                    </template>
+
+                    <template #cell(BeginDate)="row">
+                        {{ row.value | formatDate }}
+                    </template>
+
+                    <template #cell(EndDate)="row">
+                        {{ row.value | formatDate }}
+                    </template>
+
+                    <template #cell(Details)="row">
+                        <b-button 
+                            variant="success" 
+                            size="sm"
+                            class="mr-2"  
+                            @click="AcceptRequest(row.item.AvailableId)">
+                                <i class="fa fa-check"></i>
+                        </b-button>
+                        <b-button 
+                            variant="danger" 
+                            size="sm" 
+                            class="mr-2" 
+                            @click="RejectRequest(row.item.AvailableId)">
+                                <i class="fa fa-times"></i>
+                        </b-button>
+                    </template>
+                    
+                </b-table>
+            </div>
         </div>
 
         <b-modal id="modalRoom" title="Yeni Oda" hide-footer body-class="modalBody">
@@ -74,10 +139,14 @@
                         </div>
                 </b-form-group>
 
-                <b-form-group label="Blok:" label-for="select2" label-cols="4" label-cols-lg="2">
+                <b-form-group 
+                    label="Blok:" 
+                    label-for="select2" 
+                    label-cols="4" 
+                    label-cols-lg="2" 
+                    v-if="selectedRow.IsBlocky" >
                     <b-form-select 
                         id="select2" 
-                        v-if="selectedRow.IsBlocky" 
                         v-model.lazy="Possession.BlockId"
                         :state="$v.Possession.BlockId.$dirty ? !$v.Possession.BlockId.$anyError : null" 
                         @blur="$v.Possession.BlockId.$touch()"
@@ -146,6 +215,20 @@
 
             </b-form>
         </b-modal>
+
+        <b-modal id="modalWarning" title="Uyarı" hide-footer body-class="modalBody">
+            <b-form style="padding: 0">
+                <b-container class="modalRoom">
+                    <span> {{ warningText }} </span>
+                </b-container>
+                <hr>
+                <b-container class="modalFooter">
+                    <b-button variant="danger" class="float-left" @click="$bvModal.hide('modalWarning')">
+                        Kapat
+                    </b-button>
+                </b-container>
+            </b-form>
+        </b-modal>
                 
     </div>
 </template>
@@ -169,6 +252,15 @@
                     { key: 'IlceId', label: 'İlçe', sortable: true, }, 
                     { key: 'Details', label: 'Detaylar', }, 
                 ],
+                PosFields: [ 
+                    { key: 'UserName', label: 'Kullanıcı Adı', sortable: true, }, 
+                    { key: 'FullName', label: 'Ad Soyad', sortable: true, }, 
+                    { key: 'Phone', label: 'Telefon', sortable: true, }, 
+                    { key: 'Mail', label: 'Mail', sortable: true, }, 
+                    { key: 'BeginDate', label: 'İlk Tarih', sortable: true, }, 
+                    { key: 'EndDate', label: 'Son Tarih', sortable: true, }, 
+                    { key: 'Details', label: 'İşlemler', }, 
+                ],
                 Possession: {
                     MansionId: -1,
                     BlockId: null,
@@ -185,7 +277,24 @@
                 // MansionInfo: '',
                 IsBlocky: false,
                 selectedRow: {},
+                IsPossession: false,
+                selectedPossessionId: -1, 
+                selectedMansionId: -1,
+                warningText: '',
             }
+        },
+        filters: {
+            formatDate: function (value){
+                let d = new Date(value)
+                return d.toLocaleDateString()
+            },
+            formatToBool: function (value){
+                return value == 1 ? "Evet" : "Hayır"
+            },
+            formatToPhone: function (value){
+                let x = value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                return !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            },
         },
         validations() {
             return {
@@ -224,7 +333,7 @@
             }
         },
         computed: {
-            ...mapGetters(["getMansions", "getPossessionStatus", "getBlocks", "getPossessions", "getPossessionsByBlock"]),
+            ...mapGetters(["getMansions", "getPossessionStatus", "getBlocks", "getPossessions", "getPossessionsByBlock", "getPossessionInfo", "getRequestList"]),
             MansionInfo() {
                 return this.selectedRow.Name + " (" + (this.selectedRow.IsBlocky ? this.$store.getters.getBlocks.length + " Blok " : "") + this.$store.getters.getPossessions.length + " Oda)"
             }
@@ -297,6 +406,49 @@
 
                 console.log(event)
                 // this.$bvModal.hide('modalRoom')
+            },
+            selectPossession(PossessionId, MansionId) {
+                console.log(PossessionId)
+                this.selectedPossessionId = PossessionId
+                this.selectedMansionId = MansionId
+                this.$store.dispatch("PossessionInfo", PossessionId)
+                this.$store.dispatch("RequestList", { PossessionId, MansionId })
+                this.IsPossession = true
+                this.possessionSelected = true
+            },
+            selectMansion(MansionId) {
+                this.selectedMansionId = MansionId
+                this.selectedPossessionId = -1
+                this.$store.dispatch("RequestList", { PossessionId: '', MansionId })
+                this.IsPossession = false
+                this.possessionSelected = true
+            },
+            AcceptRequest(AvailableId) {
+                this.$store.dispatch("AcceptRequest", AvailableId)
+                    .then((response) => {
+                        var data = response.data
+                        if (data.AvailableId > 0) {
+                            if (this.IsPossession) {
+                                this.$store.dispatch("RequestList", { PossessionId: this.selectedPossessionId, MansionId: this.selectedMansionId })
+                            } else {
+                                this.$store.dispatch("RequestList", { PossessionId: '', MansionId: this.selectedMansionId })
+                            }
+                        } else {
+                            console.log(data.ErrorMsg)
+                            this.warningText = data.ErrorMsg
+                            this.$bvModal.show('modalWarning')
+                        }
+                    })
+            },
+            RejectRequest(AvailableId) {
+                this.$store.dispatch("RejectRequest", AvailableId)
+                    .then(() => {
+                        if (this.IsPossession) {
+                            this.$store.dispatch("RequestList", { PossessionId: this.selectedPossessionId, MansionId: this.selectedMansionId })
+                        } else {
+                            this.$store.dispatch("RequestList", { PossessionId: '', MansionId: this.selectedMansionId })
+                        }
+                    })
             },
         },
     }
