@@ -160,7 +160,6 @@
             getOrdersList() {
                 this.searchData.BeginDate = null
                 this.searchData.EndDate = null
-                console.log(this.searchData)
 
                 this.$store.dispatch("getOrdersList", { ...this.searchData })
             },

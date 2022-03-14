@@ -123,11 +123,12 @@
                             CurrentModule: i.module
                         })
                         
-                        this.$store.dispatch("ListFields", i.tableName)
-                            .then(() => {
-                                this.$store.dispatch(i.module)
-                            })
-                            
+                        // this.$store.dispatch("ListFields", i.tableName)
+                        //     .then(() => {
+                        //         this.$store.dispatch(i.module)
+                        //     })
+                        
+                        this.$store.dispatch(i.module)
                     }
                 }
             },

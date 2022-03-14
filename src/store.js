@@ -113,7 +113,7 @@ const store = new Vuex.Store({
             state.RequestList.push(item);
         },
         AssignModuleInfo(state, data) {
-            state.Fields = []
+            // state.Fields = []
             state.ModuleData = []
             state.CurrentTable = data.CurrentTable
             state.CurrentPK = data.CurrentPK
@@ -140,6 +140,7 @@ const store = new Vuex.Store({
                             dispatch("ListProvinces")
                             dispatch("ListDistrict")
                             dispatch("ListMansions")
+                            dispatch("ListFields")
 
                             router.push("/")
                         } else {
@@ -308,12 +309,22 @@ const store = new Vuex.Store({
         },
 
         //Modüller
-        ListFields({ commit, state, dispatch }, tableName){
+        ListFields({ commit, state }){
+            return axios.get("Module/ListFields")
+                .then(response => {
+                    state.Fields = []
+                    let data = response.data;
+                    for (let row in data) {
+                        data[row].key = data[row].keyValue;
+                        commit("updateFields", data[row]);
+                    }
+            })
+        },
+        ListFieldsByTbl({ commit, state, dispatch }, tableName){
             return axios.get("Module/ListFields?" + "tableName=" + tableName)
                 .then(response => {
                     state.Fields = []
                     let data = response.data;
-                    console.log(data)
                     for (let row in data) {
                         data[row].key = data[row].keyValue;
                         commit("updateFields", data[row]);
@@ -528,6 +539,11 @@ const store = new Vuex.Store({
         },
         getFields(state){
             return state.Fields;
+        },
+        getFieldsByTbl(state){
+            return state.Fields.filter(field =>
+                field.tableName == 'zzzAll' || field.tableName == state.CurrentTable || field.tableName == 'aaaAll')
+                .sort((a, b) => a.tableName.localeCompare(b.tableName))
         },
         getDB_ActionById: state => DB_Action => {
             return state.DB_Action.find(element =>

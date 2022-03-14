@@ -55,6 +55,16 @@
                 <div class="PosInfo">
                     <span>{{ "Mülk Sahibi: " + getPossessionInfo.OwnerInfo.UserName + " (" + getPossessionInfo.OwnerInfo.FirstName + " " + getPossessionInfo.OwnerInfo.LastName + ")" }}</span>
                     <span>{{ "Mülk Statüsü: " + getPossessionInfo.PossessionTypeDesc }}</span>
+                    <div style="display: none">
+                            <b-form-select
+                                id="input-5"
+                                v-model="getPossessionInfo.PossessionType"
+                            >
+                                <option v-for="Possession in getPossessionStatus" :value="Possession.PossessionStatus" :key="Possession.PossessionStatus">
+                                    {{ Possession.PossessionName }}
+                                </option>
+                            </b-form-select>
+                    </div>
                 </div>
                 <div class="PosBooked" v-if="getPossessionInfo.BookingInfo">
                     {{ "Kiracı Bilgisi: " + getPossessionInfo.BookedInfo.UserName + " (" + getPossessionInfo.BookedInfo.FirstName + " " + getPossessionInfo.BookedInfo.LastName + ")" }}
@@ -343,6 +353,7 @@
                 this.Possession.MansionId = Row.MansionId
                 this.Block.MansionId = Row.MansionId
                 this.Possession.UserId = Row.OwnerUser
+                this.Possession.PossessionType = Row.PossessionType
                 this.mansionSelected = true
                 this.selectedRow = Row
                 this.ListPossessions()
@@ -350,13 +361,16 @@
                 if (Row.IsBlocky) {
                     this.Possession.BlockId = -1
                     this.ListBlocks()
+                } 
+                else {
+                    this.Possession.BlockId = null
                 }
             },
             ResetPossession() {
                 this.Possession.No = ''
                 this.Possession.Info = ''
-                this.Possession.PossessionType = -1
-                this.Possession.BlockId = null
+                this.Possession.PossessionType = this.selectedRow.PossessionType
+                this.Possession.BlockId = -1 ?? null
                 this.$v.Possession.$reset()
                 this.$bvModal.hide('modalRoom')
             },
@@ -404,11 +418,8 @@
                     alert(JSON.stringify(this.Block))
                 }
 
-                console.log(event)
-                // this.$bvModal.hide('modalRoom')
             },
             selectPossession(PossessionId, MansionId) {
-                console.log(PossessionId)
                 this.selectedPossessionId = PossessionId
                 this.selectedMansionId = MansionId
                 this.$store.dispatch("PossessionInfo", PossessionId)
@@ -434,7 +445,6 @@
                                 this.$store.dispatch("RequestList", { PossessionId: '', MansionId: this.selectedMansionId })
                             }
                         } else {
-                            console.log(data.ErrorMsg)
                             this.warningText = data.ErrorMsg
                             this.$bvModal.show('modalWarning')
                         }

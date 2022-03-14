@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <b-table striped hover :items="getModuleData" :fields="getFields">
+        <b-table striped hover :items="getModuleData" :fields="getFieldsByTbl">
             <!-- Sıralama -->
             <template #cell(index)="data">
                 {{ data.index + 1 }}
@@ -33,6 +33,10 @@
 
             <template #cell(ImageUrl)="row">
                 <b-img :src="require(`../../../images/${GetModuleInfo.CurrentImagePath}/${row.value}`)" :alt="row.value" border=3 class="listImage" v-if="row.value!=''"></b-img>
+            </template>
+
+            <template #cell(OwnerUser)="row">
+                {{ !row.field.isPrimary && row.value != -1 ? getAdminById(row.value).UserName : "" }}
             </template>
 
             <template #row-details="row">
@@ -76,6 +80,10 @@
                         <template v-else-if="col.key == 'Type'"> 
                             <option value="-1" disabled>Lütfen Araç Seçiniz</option>
                             <option v-for="vehicle in getVehicles" :value="vehicle" :key="vehicle">{{ vehicle }}</option>
+                        </template>
+                        <template v-else-if="col.key == 'OwnerUser'"> 
+                            <option value="-1" disabled>Lütfen Sahip Seçiniz</option>
+                            <option v-for="admin in getAdminList" :value="admin.UserId" :key="admin">{{ admin.UserName }}</option>
                         </template>
                        
                     </b-form-select>
@@ -137,7 +145,6 @@
 
 <script>
     import {mapGetters} from "vuex";
-    import UploadService from "../services/UploadFilesService";
 
     export default {
         data() {
@@ -167,16 +174,16 @@
             },
         },
         created() {
-            this.infoModal.cols = this.$store.getters.getFields
+            this.infoModal.cols = this.$store.getters.getFieldsByTbl
         },
         computed: {
-            ...mapGetters(["getModuleData", "getFields", "getAdminById", "getDB_ActionById", "getProvinces", "getDistrict", "getVehicles", "GetModuleInfo"]),
+            ...mapGetters(["getModuleData", "getFields", "getAdminById", "getDB_ActionById", "getProvinces", "getDistrict", "getVehicles", "GetModuleInfo", "getFieldsByTbl", "getAdminList"]),
         },
         methods: {
             openNew(button) {
                 this.uploadFile = null
                 this.isUpdate = false
-                this.infoModal.cols = this.$store.getters.getFields
+                this.infoModal.cols = this.$store.getters.getFieldsByTbl
                 let rows = {}
                 this.infoModal.cols.forEach(e => {
                     rows[e.keyValue] = e.infoType == "text" ? "" :
@@ -190,7 +197,7 @@
             openUpdate(item, index, button) {
                 this.uploadFile = null
                 this.isUpdate = true
-                this.infoModal.cols = this.$store.getters.getFields
+                this.infoModal.cols = this.$store.getters.getFieldsByTbl
                 let rows = {}
                 // this.infoModal.row = item
                 this.infoModal.cols.forEach(e => {
@@ -216,15 +223,7 @@
                 let data = JSON.stringify(this.infoModal.row)
                 if ('ImageUrl' in this.infoModal.row) {
                     
-                            UploadService.upload(this.uploadFile, (event) => {
-                                var progress = Math.round((100 * event.loaded) / event.total);
-                                console.log(progress)
-                            })
-
-                    this.$store.dispatch("AddPicture", { image: this.uploadFile })
-                        .then((response) => {
-                            console.log(response)
-                        })
+                    //TO DO
                     this.Upload(this.uploadFile)
                         .then(x => {
                             console.log([].concat(x))
@@ -237,7 +236,7 @@
                         fd.append("canvasImage", blob);
                         
                         }
-                        )
+                    )
                 } else {
                     this.$store.dispatch("UpdateModule", { updateInfo: data })
                         .then((response) => {
@@ -319,9 +318,6 @@
 
                 return new Blob([ia], {type:mimeString});
             }
-        },
-        destroyed () {
-            console.log('destroyed');
         },
     }
 </script>
