@@ -23,7 +23,7 @@
     }
 </script>
 
-<style>
+<style lang="scss">
     body {
         font-family: poppins;
     }
@@ -148,10 +148,14 @@
         padding: 10px;
     }
     .PosInfo {
-        
         display: flex;
         flex-direction: column;
         gap: 5px;
+    }
+    .PostRent {
+        &-Select {
+            width: 200px;
+        }
     }
     .listImage {
         width: 250px;

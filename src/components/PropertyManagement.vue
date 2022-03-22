@@ -66,6 +66,19 @@
                             </b-form-select>
                     </div>
                 </div>
+                <div class="PostRent" v-if="getPossessionInfo.RentableRequest">
+                    <span> Kiralama Durumu: </span>
+                    <b-form-select
+                        id="input-5"
+                        v-model="getPossessionInfo.RentableRequest.Status"
+                        class="PostRent-Select"
+                        @change="UpdateRentable(getPossessionInfo.RentableRequest.Status, getPossessionInfo.RentableRequest.RequestId)"
+                    >
+                        <option v-for="RentableStatus in getRentableStatus" :value="RentableStatus.RentableStatus" :key="RentableStatus.RentableStatus">
+                            {{ RentableStatus.RentableName }}
+                        </option>
+                    </b-form-select>
+                </div>
                 <div class="PosBooked" v-if="getPossessionInfo.BookingInfo">
                     {{ "Kiracı Bilgisi: " + getPossessionInfo.BookedInfo.UserName + " (" + getPossessionInfo.BookedInfo.FirstName + " " + getPossessionInfo.BookedInfo.LastName + ")" }}
                     {{ "Kira Süresi:    " + (getPossessionInfo.BookingInfo.BeginDate | formatDate) + " - " + (getPossessionInfo.BookingInfo.EndDate | formatDate) }}
@@ -343,7 +356,7 @@
             }
         },
         computed: {
-            ...mapGetters(["getMansions", "getPossessionStatus", "getBlocks", "getPossessions", "getPossessionsByBlock", "getPossessionInfo", "getRequestList"]),
+            ...mapGetters(["getMansions", "getPossessionStatus", "getBlocks", "getPossessions", "getPossessionsByBlock", "getPossessionInfo", "getRequestList", "getRentableStatus"]),
             MansionInfo() {
                 return this.selectedRow.Name + " (" + (this.selectedRow.IsBlocky ? this.$store.getters.getBlocks.length + " Blok " : "") + this.$store.getters.getPossessions.length + " Oda)"
             }
@@ -458,6 +471,12 @@
                         } else {
                             this.$store.dispatch("RequestList", { PossessionId: '', MansionId: this.selectedMansionId })
                         }
+                    })
+            },
+            UpdateRentable(Status, RequestId) {
+                this.$store.dispatch("UpdateRentable", { Status: Status, RequestId: RequestId })
+                    .then(() => {
+                        this.$store.dispatch("PossessionInfo", this.selectedPossessionId)
                     })
             },
         },

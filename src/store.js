@@ -35,6 +35,13 @@ const store = new Vuex.Store({
             { PossessionStatus: 5, PossessionName: "Firma Sahip Ziyaretlik" }, 
             { PossessionStatus: 6, PossessionName: "Kullanım Dışı" }, 
         ],
+        RentableStatus: [
+            { RentableStatus: 1, RentableName: " Yeni İstek" }, 
+            { RentableStatus: 2, RentableName: " Teklif Sunuldu" }, 
+            { RentableStatus: 3, RentableName: " Sözleşme Aşamasında" }, 
+            { RentableStatus: 4, RentableName: " Kabul Edildi" }, 
+            { RentableStatus: 5, RentableName: " Reddedildi" }, 
+        ],
         OrderInfo: [],
         OrderLog: [],
         AdminList: [],
@@ -393,7 +400,7 @@ const store = new Vuex.Store({
                     }
             })
         },
-        ListMansion({ commit, state }){
+        ListMansion({ commit, state, dispatch }){
             axios.get("Module/ListMansion")
                 .then(response => {
                     state.ModuleData = []
@@ -401,6 +408,8 @@ const store = new Vuex.Store({
                     for (let key in data) {
                         commit("updateModuleData", data[key]);
                     }
+
+                    dispatch("ListMansions")
             })
         },
         UpdateModule({ state, dispatch }, payload){
@@ -490,6 +499,10 @@ const store = new Vuex.Store({
         RejectRequest({ state }, AvailableId) {
             return axios.post("Property/RejectRequest?AvailableId=" + AvailableId + "&SessionKey=" + state.SessionKey)
         },
+        UpdateRentable({ state }, RentData ) {
+            return axios.post("Property/UpdateRentable?" + "RequestId=" + RentData.RequestId + "&Status=" + RentData.Status + 
+                "&SessionKey=" + state.SessionKey)
+        },
     },
     getters: {
         isAuthenticated(state){
@@ -578,6 +591,14 @@ const store = new Vuex.Store({
         },
         getPossessionInfo(state){
             return state.PossessionInfo;
+        },
+        getRentableStatus(state) {
+            return state.RentableStatus;
+        },
+        getRentableStatusNameById: state => Status => {
+            return state.RentableStatus.find(element => 
+                element.RentableStatus === Status
+            ).RentableName
         },
         getRequestList(state){
             return state.RequestList;

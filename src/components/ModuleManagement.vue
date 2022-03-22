@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <b-table striped hover :items="getModuleData" :fields="getFieldsByTbl">
+        <b-table striped hover :items="getModuleData" :fields="getFieldsByTbl.filter(x => x.tableShow)">
             <!-- Sıralama -->
             <template #cell(index)="data">
                 {{ data.index + 1 }}
@@ -85,8 +85,24 @@
                             <option value="-1" disabled>Lütfen Sahip Seçiniz</option>
                             <option v-for="admin in getAdminList" :value="admin.UserId" :key="admin">{{ admin.UserName }}</option>
                         </template>
+                        <template v-else-if="col.key == 'PossessionType'"> 
+                            <option value="-1" disabled>Lütfen Statü Seçiniz</option>
+                            <option value="3">Firma Sahip Satılık</option>
+                            <option value="4">Firma Sahip Kiralık</option>
+                        </template>
                        
                     </b-form-select>
+                    <b-form-checkbox
+                        v-else-if="col.infoType == 'check'"
+                        :id="col.key"
+                        v-model="infoModal.row[col.key]"
+                        :disabled="isUpdate ? !col.infoEdit : !col.infoNew"
+                        size="lg"
+                        value="true"
+                        unchecked-value="false"
+                    >
+                        Proje Blok Düzeninde
+                    </b-form-checkbox>
                     <b-form-input 
                         v-else
                         :id="col.key"
@@ -188,6 +204,7 @@
                 this.infoModal.cols.forEach(e => {
                     rows[e.keyValue] = e.infoType == "text" ? "" :
                         e.infoType == "select" ? "-1" :
+                        e.infoType == "check" ? "false" :
                         e.infoType == "image" ? "" : "";
                 });
                 this.infoModal.row = rows
