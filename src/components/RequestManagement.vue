@@ -15,6 +15,7 @@
                     <td>Ad-Soyad</td>
                     <td>Mail</td>
                     <td>Telefon</td>
+                    <td>Oda</td>
                     <td>Talep Tarihi</td>
                     <td>Talep Durumu
                         <select name="" id="slct_orderStatus" @change="getOrdersList" v-model="searchData.OrderStatus"> 
@@ -34,6 +35,7 @@
                         <td> {{ Order.FirstName + " " + Order.LastName  }} </td>
                         <td> {{ Order.Mail }} </td>
                         <td> {{ Order.PhoneNumber }} </td>
+                        <td> {{ Order.Possession }} </td>
                         <td> {{ Order.OrderDate | formatDate }} </td>
                         <td> {{ getOrderStatusById(Order.OrderStatus).StatusName }} </td>
                         <td>
