@@ -54,6 +54,7 @@ const store = new Vuex.Store({
         Possessions: [],
         PossessionInfo: {},
         RequestList: [],
+        ActivityType: [],
         DB_Action: [
             { ActionId: 1, Action: "Yeni İşlem" },
             { ActionId: 2, Action: "Düzenlendi" },
@@ -126,8 +127,10 @@ const store = new Vuex.Store({
             state.CurrentPK = data.CurrentPK
             state.CurrentImagePath = data.CurrentImagePath
             state.CurrentModule = data.CurrentModule
-        }
-
+        },
+        updateActivityTypeList(state, item) {
+            state.ActivityType.push(item);
+        },
     },
     actions: {
         initAuth({ commit, dispatch }){
@@ -198,8 +201,8 @@ const store = new Vuex.Store({
         //Talep Yönetimi
         getOrdersList({ commit, state, dispatch }, searchData){
             //Talep Verilerini yükle
-            axios.get("Request/ListOrders?" + "OrderType=" + searchData.OrderType + "&BeginDate=" + searchData.BeginDate + 
-                "&EndDate=" + searchData.EndDate + "&OrderStatus=" + searchData.OrderStatus + "&SessionKey=" + state.SessionKey)
+            return axios.get("Request/ListOrders?" + "OrderType=" + searchData.OrderType + "&BeginDate=" + searchData.BeginDate + "&EndDate=" + searchData.EndDate + 
+                "&OrderStatus=" + searchData.OrderStatus + "&currentPage=" + searchData.currentPage + "&perPage=" + searchData.perPage + "&SessionKey=" + state.SessionKey)
                 .then(response => {
                     state.Orders = []
                     let data = response.data;
@@ -212,6 +215,8 @@ const store = new Vuex.Store({
                     } else {
                         dispatch("sessionControl");
                     }
+
+                    return response.data
             })
         },
         updateOrder({ state }, updateData ){
@@ -221,7 +226,7 @@ const store = new Vuex.Store({
         },
         getOrdersInfo({ commit, state, dispatch }, selectedOrder){
             //Talep Detay Bilgileri
-            axios.get("Request/OrderInfo?" + "OrderId=" + selectedOrder.OrderId + "&OrderType=" + selectedOrder.OrderType + "&SessionKey=" + state.SessionKey)
+            return axios.get("Request/OrderInfo?" + "OrderId=" + selectedOrder.OrderId + "&OrderType=" + selectedOrder.OrderType + "&SessionKey=" + state.SessionKey)
                 .then(response => {
                     state.OrderInfo = []
                     let data = response.data;
@@ -255,10 +260,9 @@ const store = new Vuex.Store({
         //Kullanıcı Yönetimi
         getUsersList({ commit, state, dispatch }, searchData){
             //Kullanıcı Listesini yükle
-            state.searchData = searchData
-            axios.get("User/ListUser?" + "UserId=" + searchData.UserId + "&UserName=" + searchData.UserName + 
-                "&Mail=" + searchData.Mail + "&Name=" + searchData.Name + "&RoleId=" + searchData.RoleId + 
-                "&isActivated=" + searchData.isActivated + "&SessionKey=" + state.SessionKey)
+            return axios.get("User/ListUser?" + "UserId=" + searchData.UserId + "&UserName=" + searchData.UserName + "&Mail=" + searchData.Mail + 
+                "&Name=" + searchData.Name + "&RoleId=" + searchData.RoleId + "&isActivated=" + searchData.isActivated + 
+                "&currentPage=" + searchData.currentPage + "&perPage=" + searchData.perPage + "&SessionKey=" + state.SessionKey)
                 .then(response => {
                     state.Users = []
                     let data = response.data;
@@ -270,6 +274,8 @@ const store = new Vuex.Store({
                     } else {
                         dispatch("sessionControl");
                     }
+
+                    return response.data
                 }
             )
         },
@@ -503,6 +509,41 @@ const store = new Vuex.Store({
             return axios.post("Property/UpdateRentable?" + "RequestId=" + RentData.RequestId + "&Status=" + RentData.Status + 
                 "&SessionKey=" + state.SessionKey)
         },
+
+        //Aktiviteler Sayfası
+        getActivityTypeList({ dispatch, commit, state }) {
+            axios.get("Module/ListActivityTypes")
+                .then(response => {
+                    state.ActivityType = []
+                    let data = response.data;
+                    for (let key in data) {
+                        data[key].key = key;
+                        commit("updateActivityTypeList", data[key]);
+                    }
+                })
+                .catch((error) => {
+                    dispatch("SetError", error)
+                })
+        },
+        UpdateActivityStatus({ state, dispatch }, payload){
+            axios.post("Module/UpdateActivityStatus?ActivityTypeId=" + payload.ActivityTypeId + "&Status=" + payload.Status + "&SessionKey=" + state.SessionKey)
+                .then(() => { dispatch("getActivityTypeList") })
+        },
+
+        //Error Management
+        SetError({ dispatch, state }, Error) {
+            let URL = Error.request.responseURL
+            let Msg = Error.response.data.ErrorMsg
+            let Code = Error.response.data.ErrorCode
+            let Page = window.location.pathname
+            console.log("Caught", Error);
+
+            if (Code > -200) { //-100 ile -200 arası Session Error Olacak
+                dispatch("sessionControl");
+            } else {
+                axios.post("HelisData/AddError?Application=HelisAPP&Module=" + Page + "&Process=" + URL + "&Message=" + Msg + "&DB_Action=1&DB_User=" + state.loginUserId)
+            }
+        },
     },
     getters: {
         isAuthenticated(state){
@@ -610,7 +651,10 @@ const store = new Vuex.Store({
                 CurrentImagePath: state.CurrentImagePath,
                 CurrentModule: state.CurrentModule,
             };
-        }
+        },
+        getActivityType(state) {
+            return state.ActivityType;
+        },
     }
 })
 

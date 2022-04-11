@@ -1,6 +1,7 @@
 <template>
-    <div class="container">
-        <div :style="'max-height: calc(100vh - ' + (selectedOrder.OrderId != null ? '260' : '10') + 'px); overflow-y: auto; margin-bottom: 10px; border-bottom: .5px solid rgba(0,0,0,.125)'">
+    <div class="pageContainer">
+        <div :style="'overflow-y: auto; border-bottom: .5px solid rgba(0,0,0,.125); ' + 
+            'max-height: calc(100vh - ' + (selectedOrder.OrderId != null && rows > perPage ? '290' : selectedOrder.OrderId != null ? '250' : rows > perPage ? '40' : '0') + 'px);'">
             <table class="table table-hover table-striped table-bordered requestTable">
                 <thead>
                     <td>TalepId</td>
@@ -41,7 +42,8 @@
                         <td>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend dropleft" style="width: 100%;" ref="dropleft">
-                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%;" @click="selectOrder(Order)"> İşlem</button>
+                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" 
+                                    aria-expanded="false" style="width: 100%;" @click="selectOrder(Order)"> İşlem</button>
                                     <div class="dropdown-menu" style="padding: 0; border: 3px solid #460df4;" @click="$event.stopPropagation()" ref="dropdown">
                                         <table class="table-edited">
                                             <tr style="background-color: #0062cc;">
@@ -85,11 +87,6 @@
                         <b-table striped hover :items="getOrderInfo" thead-tr-class="d-none" table-class="requestTable">
                             
                         </b-table>
-                        <!-- <b-card-text v-for="Info in OrderInfo" :key="Info.RowId">Tab contents 1</b-card-text>
-                        <b-card-text>Tab contents 1</b-card-text>
-                        <b-card-text>Tab contents 1</b-card-text>
-                        <b-card-text>Tab contents 1</b-card-text>
-                        <b-card-text>Tab contents 1</b-card-text> -->
                     </b-tab>
                     <b-tab title="Loglar">
                         <b-table striped hover :items="getOrderLog" :fields="fields" table-class="requestTable">
@@ -98,6 +95,17 @@
                     </b-tab>
                 </b-tabs>
             </b-card>
+        </div>
+        <div class="paging" v-if="rows > perPage">
+            <b-pagination
+                v-model="currentPage"
+                :total-rows="rows"
+                :per-page="perPage"
+                first-number
+                last-number
+                @input="getOrdersList"
+            ></b-pagination>
+            <div v-html="PagingText"></div>
         </div>
     </div>
 </template>
@@ -114,6 +122,8 @@
                     BeginDate: null,
                     EndDate: null,
                     OrderStatus: null,
+                    currentPage: 1,
+                    perPage: 20,
                 },
                 selectedOrder: {
                     OrderStatus: null,
@@ -127,6 +137,9 @@
                     { key: 'UserName', label: 'Kullanıcı',  }, 
                     { key: 'Date', label: 'İşlem Tarihi', sortable: true } 
                 ],
+                rows: 0,
+                perPage: 20,
+                currentPage: 1,
             }
         },
         filters: {
@@ -154,6 +167,9 @@
             ...mapGetters(["getOrders"]),
             ...mapGetters(["getOrderInfo"]),
             ...mapGetters(["getOrderLog"]),
+            PagingText() {
+                return '<b>' +  this.rows + '</b> kayıt arasında ' + ((this.currentPage - 1) * this.perPage + 1) + ' - ' + Math.min((this.currentPage * this.perPage), this.rows) + ' arası kayıtlar'
+            },
         },
         created() {
             this.getOrdersList()
@@ -162,8 +178,20 @@
             getOrdersList() {
                 this.searchData.BeginDate = null
                 this.searchData.EndDate = null
+                
+                this.searchData.perPage = this.perPage
+                this.searchData.currentPage = this.currentPage
 
                 this.$store.dispatch("getOrdersList", { ...this.searchData })
+                    .then(Response => {
+                        if (Response.length > 0) {
+                            this.rows = Response[0].OrderCount
+                        }
+                        else {
+                            this.rows = 0
+                        this.currentPage = 1
+                        }
+                    })
             },
             getOrderStatusById(id) {
                 return this.$store.getters.getOrderStatusById(id);

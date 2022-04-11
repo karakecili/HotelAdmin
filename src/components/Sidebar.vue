@@ -91,6 +91,12 @@
                         ],
                     },
                     {
+                        href: "/activities",
+                        title: "Aktivite Yönetimi",
+                        icon: "m1 fas fas fa-hiking",
+                        tableName: "Tbl_User"
+                    },
+                    {
                         href: "#",
                         title: "Çıkış",
                         icon: "m1 fa fa-sign-out-alt",

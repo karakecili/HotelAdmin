@@ -160,4 +160,14 @@
     .listImage {
         width: 250px;
     }
+    .pageContainer {
+        width: 100%;
+    }
+    .paging {
+        height: 40px;
+        padding-top: 5px;
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+    }
 </style>

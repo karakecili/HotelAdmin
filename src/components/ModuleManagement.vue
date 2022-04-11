@@ -129,6 +129,8 @@
                         placeholder="Dosya seçiniz veya buraya sürükleyiniz..."
                         drop-placeholder="Dosyayı buraya sürükleyiniz..."
                         v-if="col.infoType == 'image' && col.infoEdit"
+                        @change="fileChange"
+                        accept=".jpg, .png"
                     ></b-form-file>
                 </b-form-group>
 
@@ -161,6 +163,7 @@
 
 <script>
     import {mapGetters} from "vuex";
+    import axios from "axios"
 
     export default {
         data() {
@@ -174,6 +177,8 @@
                 },
                 isUpdate: false,
                 uploadFile: null,
+                file: null,
+                fileName: null,
             }
         },
         filters: {
@@ -240,17 +245,36 @@
                 let data = JSON.stringify(this.infoModal.row)
                 if ('ImageUrl' in this.infoModal.row) {
                     
+                    var formData = new FormData();
+                    formData.append("file", this.uploadFile);
+                    // formData.append("FormFile", this.uploadFile);
+                    // formData.append("FileName", this.uploadFile.name);
+                    // formData.append("selectedfiles", this.uploadFile);
+                    axios.post("Module/UploadFileAsync", formData);
+                    // axios.post("Module/UploadPhoto", this.uploadFile);
+                    // axios.post("Module/UploadFileAsync", formData);
+                    axios({
+                    method: "post",
+                    url: "Module/UploadPhoto",
+                    data: formData,
+                    headers: { "Content-Type": "multipart/form-data" },
+                    })
                     //TO DO
                     this.Upload(this.uploadFile)
                         .then(x => {
                             console.log([].concat(x))
                             
-                    this.$store.dispatch("AddPicture", { image: x[0] })
+                    formData.append("FormFile", x[0].FormFile);
+                    formData.append("FileName", x[0].fileName);
+                    // axios.post("Module/Post", formData);
+                    // axios.post("Module/Post", x[0]);
+                    // this.$store.dispatch("AddPicture", formData)
                     
                         var dataURL = x[0].url
                         var blob = this.dataURItoBlob(dataURL);
-                        var fd = new FormData(document.forms[0]);
-                        fd.append("canvasImage", blob);
+                        var fd = new FormData();
+                        fd.append("file", blob);
+                        axios.post("Module/Post", fd);
                         
                         }
                     )
@@ -271,6 +295,21 @@
                         this.$bvModal.hide(this.infoModal.id)
                     })
             },
+            fileChange(e) {
+                console.log(e);
+            },
+            upload2(formData) {
+                
+                const BASE_URL = 'http://192.168.10.71:3000';
+                const url = `${BASE_URL}/photos/upload`;
+                return axios.post(url, formData)
+                    // get data
+                    .then(x => x.data)
+                    // add url field
+                    .then(x => x.map(img => Object.assign({},
+                        img, { url: `${BASE_URL}/images/${img.id}` })));
+            },
+
             Upload(formData) {
                 const photos = []
                 photos[0] = formData
@@ -279,7 +318,8 @@
                         id: img,
                         originalName: x.name,
                         fileName: x.name,
-                        url: img
+                        url: img,
+                        FormFile: img
                     })));
                 return Promise.all(promises);
             },
@@ -304,7 +344,7 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0);
 
-                const dataURL = canvas.toDataURL('image/png');
+                const dataURL = canvas.toDataURL('image/jpg');
 
                 return dataURL;
                 // return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");

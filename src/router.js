@@ -4,6 +4,7 @@ import RequestManagement from "./components/RequestManagement.vue"
 import UserManagement from "./components/UserManagement.vue"
 import ModuleManagement from "./components/ModuleManagement.vue"
 import PropertyManagement from "./components/PropertyManagement.vue"
+import ActivityManagement from "./components/ActivityManagement.vue"
 
 import Auth from "./components/Auth.vue"
 
@@ -59,6 +60,18 @@ export const router = new VueRouter({
             name: "Hizmet Yönetimi",
             alias: ['/modules/il', '/modules/ilce', '/modules/havalimani', '/modules/araclar', '/modules/restaurant', '/modules/hotel'],
             component: ModuleManagement,
+            beforeEnter(to, from, next) {
+                if (store.getters.isAuthenticated) {
+                    next()
+                } else {
+                    next("/auth")
+                }
+            }
+        },
+        {
+            path: "/activities",
+            name: "Aktivite Yönetimi",
+            component: ActivityManagement,
             beforeEnter(to, from, next) {
                 if (store.getters.isAuthenticated) {
                     next()

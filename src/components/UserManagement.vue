@@ -1,62 +1,72 @@
 <template>
-    <div class="container" style="margin-top: 5px; margin-bottom: 5px;">
-        <table class="table table-hover table-striped table-bordered" v-if="!isEdit">
-            <thead>
-                <td>Kullanıcı</td>
-                <td>Ad-Soyad</td>
-                <td>Mail</td>
-                <td>Telefon</td>
-                <td>Rol
-                    <select name="" id="slct_role" @change="getUsersList" v-model="searchData.RoleId"> 
-                        <option selected  value="null">Hepsi</option>
-                        <option v-for="role in getRoleList" :value="role.RoleId" :key="role.RoleId">{{ role.RoleName }}
-                        </option>
-                    </select>
-                </td>
-                <td>Kayıt Tarihi</td>
-                <!-- <td>Aktiflik</td> -->
-                <td>Son İşlem Tarihi</td>
-                <td>İşlem
-                    <button class="btn-primary" style="border-radius: 12px; border: solid 2px #0d6efd; background-color: #007bff" title="Yeni Kullanıcı" @click="openNew">
-                        <i class="fa fa-user-plus" aria-hidden="true"></i>
-                    </button>
-                </td>
-            </thead>
-            <tbody>
-                <tr v-for="User in getUserList" :key="User.UserId">
-                    <td> {{ User.UserName }} </td>
-                    <td> {{ User.FirstName + " " + User.LastName  }} </td>
-                    <td> {{ User.Mail }} </td>
-                    <td> {{ User.PhoneNumber | formatToPhone }} </td>
-                    <td> {{ getRoleById(User.RoleId).RoleName }} </td>
-                    <td> {{ User.RegisterDate | formatDate }} </td>
-                    <!-- <td> {{ User.Activity | formatToBool }} </td> -->
-                    <td> {{ User.DB_Datetime | formatDate }} </td>
-                    <td>
-                        <button class="btn-secondary btn-icon" style="border-radius: 12px; margin-right: 5px; border: solid 2px #6c757d;" title="Düzenle" @click="openEdit(User)">
-                            <i class="fa fa-user-edit" aria-hidden="true"></i>
-                        </button>
-                        <button :class="User.DB_Action == 0 ? 'btn-success' : 'btn-danger'" :title="User.DB_Action == 0 ? 'Aktife Al' : 'Pasife Al'"
-                            :style="User.DB_Action == 0 ? 'border-radius: 12px; border: solid 2px #198754;' : 'border-radius: 12px; border: solid 2px #dc3545'" 
-                            @click="SetActivePassive(User.DB_Action == 0, User.UserId)">
-                            <!-- <i :class="User.DB_Action == 0 ? 'fa fa-check' : 'fa fa-times'" aria-hidden="true" ></i> -->
-                            <span v-show="User.DB_Action == 0"><i class="fa fa-user-check" aria-hidden="true"></i></span>
-                            <span v-show="User.DB_Action != 0"><i class="fa fa-user-times" aria-hidden="true"></i></span>
-                        </button>
-                        <!-- <button class="btn-danger" style="border-radius: 12px; border: solid 2px #dc3545;" title="Pasife Al" @click="SetActivePassive(false, User.UserId)" v-else>
-                            <i class="fa fa-times" aria-hidden="true"></i>
-                        </button> -->
-                    </td>
-                </tr>
-                <tr v-if="getUserList.length == 0">
-                    <td colspan="8" style="background-color: #fff4d0; color: #664d03;">
-                        <div class="alert" style="background-color: #f2e8c5; border-color: #f2e8c5; color: #664d03; text-align: center;">
-                            <strong>Filtreye Uygun Bir Kayıt Bulunamadı</strong>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="pageContainer">
+        <div v-if="!isEdit">
+            <div :style="'max-height: calc(100vh - ' + (rows > perPage ? '40' : '0') + 'px);overflow-y: auto;'">
+                    
+                <table class="table table-hover table-striped table-bordered">
+                    <thead>
+                        <td>Kullanıcı</td>
+                        <td>Ad-Soyad</td>
+                        <td>Mail</td>
+                        <td>Telefon</td>
+                        <td>Rol
+                            <select name="" id="slct_role" @change="getUsersList" v-model="searchData.RoleId"> 
+                                <option selected  value="null">Hepsi</option>
+                                <option v-for="role in getRoleList" :value="role.RoleId" :key="role.RoleId">{{ role.RoleName }}
+                                </option>
+                            </select>
+                        </td>
+                        <td>Kayıt Tarihi</td>
+                        <td>Son İşlem Tarihi</td>
+                        <td>İşlem
+                            <button class="btn-primary" style="border-radius: 12px; border: solid 2px #0d6efd; background-color: #007bff" title="Yeni Kullanıcı" @click="openNew">
+                                <i class="fa fa-user-plus" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                    </thead>
+                    <tbody>
+                        <tr v-for="User in getUserList" :key="User.UserId">
+                            <td> {{ User.UserName }} </td>
+                            <td> {{ User.FirstName + " " + User.LastName  }} </td>
+                            <td> {{ User.Mail }} </td>
+                            <td> {{ User.PhoneNumber | formatToPhone }} </td>
+                            <td> {{ getRoleById(User.RoleId).RoleName }} </td>
+                            <td> {{ User.RegisterDate | formatDate }} </td>
+                            <td> {{ User.DB_Datetime | formatDate }} </td>
+                            <td>
+                                <button class="btn-secondary btn-icon" style="border-radius: 12px; margin-right: 5px; border: solid 2px #6c757d;" title="Düzenle" @click="openEdit(User)">
+                                    <i class="fa fa-user-edit" aria-hidden="true"></i>
+                                </button>
+                                <button :class="User.DB_Action == 0 ? 'btn-success' : 'btn-danger'" :title="User.DB_Action == 0 ? 'Aktife Al' : 'Pasife Al'"
+                                    :style="User.DB_Action == 0 ? 'border-radius: 12px; border: solid 2px #198754;' : 'border-radius: 12px; border: solid 2px #dc3545'" 
+                                    @click="SetActivePassive(User.DB_Action == 0, User.UserId)">
+                                    <span v-show="User.DB_Action == 0"><i class="fa fa-user-check" aria-hidden="true"></i></span>
+                                    <span v-show="User.DB_Action != 0"><i class="fa fa-user-times" aria-hidden="true"></i></span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr v-if="getUserList.length == 0">
+                            <td colspan="8" style="background-color: #fff4d0; color: #664d03;">
+                                <div class="alert" style="background-color: #f2e8c5; border-color: #f2e8c5; color: #664d03; text-align: center;">
+                                    <strong>Filtreye Uygun Bir Kayıt Bulunamadı</strong>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="paging" v-if="rows > perPage">
+                <b-pagination
+                    v-model="currentPage"
+                    :total-rows="rows"
+                    :per-page="perPage"
+                    first-number
+                    last-number
+                    @input="getUsersList"
+                ></b-pagination>
+                <div v-html="PagingText"></div>
+            </div>
+        </div>
         <b-form @submit="onSubmit" @reset="onReset" v-else>
             <b-form-group
                 id="input-group-1"
@@ -179,6 +189,8 @@
                     Name: '',
                     RoleId: null,
                     isActivated: null,
+                    currentPage: 1,
+                    perPage: 20,
                 },
                 isEdit: false,
                 isNew: false,
@@ -195,6 +207,9 @@
                     PhoneNumber: '',
                     RoleId: '',
                 },
+                rows: 0,
+                perPage: 20,
+                currentPage: 1,
             }
         },
         filters: {
@@ -215,6 +230,9 @@
         computed: {
             ...mapGetters(["getUserList"]),
             ...mapGetters(["getRoleList"]),
+            PagingText() {
+                return '<b>' +  this.rows + '</b> kayıt arasında ' + ((this.currentPage - 1) * this.perPage + 1) + ' - ' + Math.min((this.currentPage * this.perPage), this.rows) + ' arası kayıtlar'
+            },
         },
         created() {
             this.getUsersList()
@@ -225,7 +243,19 @@
                 this.Form.PhoneNumber = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
             },
             getUsersList() {
+                this.searchData.perPage = this.perPage
+                this.searchData.currentPage = this.currentPage
+
                 this.$store.dispatch("getUsersList", { ...this.searchData })
+                    .then(Response => {
+                        if (Response.length > 0) {
+                            this.rows = Response[0].OrderCount
+                        }
+                        else {
+                            this.rows = 0
+                        this.currentPage = 1
+                        }
+                    })
             },
             getRolesList() {
                 this.$store.dispatch("getRolesList", { ...this.searchData })
