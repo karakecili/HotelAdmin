@@ -11,8 +11,8 @@
                         <td>Telefon</td>
                         <td>Rol
                             <select name="" id="slct_role" @change="getUsersList" v-model="searchData.RoleId"> 
-                                <option selected  value="null">Hepsi</option>
-                                <option v-for="role in getRoleList" :value="role.RoleId" :key="role.RoleId">{{ role.RoleName }}
+                                <option selected value="null">Hepsi</option>
+                                <option v-for="role in getRoleList" :value="role.RoleId" :key="role.RoleId">{{ role.Description }}
                                 </option>
                             </select>
                         </td>
@@ -30,7 +30,7 @@
                             <td> {{ User.FirstName + " " + User.LastName  }} </td>
                             <td> {{ User.Mail }} </td>
                             <td> {{ User.PhoneNumber | formatToPhone }} </td>
-                            <td> {{ getRoleById(User.RoleId).RoleName }} </td>
+                            <td> {{ getRoleById(User.RoleId).Description }} </td>
                             <td> {{ User.RegisterDate | formatDate }} </td>
                             <td> {{ User.DB_Datetime | formatDate }} </td>
                             <td>
@@ -153,10 +153,6 @@
                 ></b-form-input>
             </b-form-group>
 
-            <b-form-group id="input-group-6" label="Mülk:" label-for="input-6">
-
-            </b-form-group>
-
             <b-form-group id="input-group-5" label="Rol:" label-for="input-5">
                 <b-form-select
                     id="input-5"
@@ -169,9 +165,11 @@
                 </b-form-select>
             </b-form-group>
 
-            <b-button type="submit" variant="primary" style="margin-right: 5px;">Gönder</b-button>
-            <b-button type="reset" variant="warning" v-if="isNew" style="margin-right: 5px;">Temizle</b-button>
-            <b-button variant="danger" style="margin-right: 5px;" @click="openList">İptal</b-button>
+            <b-form-group class="buttonGroup">
+                <b-button type="submit" variant="primary" style="margin-right: 5px;">Gönder</b-button>
+                <b-button type="reset" variant="warning" v-if="isNew" style="margin-right: 5px;">Temizle</b-button>
+                <b-button variant="danger" style="margin-right: 5px;" @click="openList">İptal</b-button>
+            </b-form-group>
         </b-form>
     </div>
 </template>

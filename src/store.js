@@ -67,6 +67,7 @@ const store = new Vuex.Store({
         CurrentPK: "",
         CurrentImagePath: "",
         CurrentModule: "",
+        LoadedFirstTime: true,
     },
     mutations: {
         setSession(state, data){
@@ -164,27 +165,24 @@ const store = new Vuex.Store({
                 )
             }
         },
-        login({ commit, dispatch }, authData){
-
-            return axios.get("Session/AdminLogin?" + "UserName=" + authData.email + "&Password=" + authData.password)
-                .then(response => {
-                let data = response.data;
-                
-                localStorage.setItem("RoleId", data.RoleId)
-                localStorage.setItem("Session", data.Session)
-                localStorage.setItem("UserId", data.UserId)
-                commit("setSession", data)
-                dispatch("initAuth")
-            })
+        async login({ commit, dispatch }, authData){
+            const response = await axios.get("Session/AdminLogin?" + "UserName=" + authData.email + "&Password=" + authData.password)
+            let data = response.data
+            localStorage.setItem("RoleId", data.RoleId)
+            localStorage.setItem("Session", data.Session)
+            localStorage.setItem("UserId", data.UserId)
+            commit("setSession", data)
+            dispatch("initAuth")
 
         },
-        logout({ commit, state }){
-            axios.get("Session/Logout?SessionKey=" + state.SessionKey)
+        async logout({ commit, state }){
+            const response = await axios.post("Session/Logout?SessionKey=" + state.SessionKey)
             commit("clearSession")
             localStorage.removeItem("RoleId")
             localStorage.removeItem("Session")
             localStorage.removeItem("UserId")
             router.replace("/auth")
+            return response.data
         },
         sessionControl({ state, dispatch }){
             axios.get("Session/AdminSessionControl?" + "SessionKey=" + state.SessionKey)
@@ -199,46 +197,40 @@ const store = new Vuex.Store({
         },
 
         //Talep Yönetimi
-        getOrdersList({ commit, state, dispatch }, searchData){
+        async getOrdersList({ commit, state, dispatch }, searchData){
             //Talep Verilerini yükle
-            return axios.get("Request/ListOrders?" + "OrderType=" + searchData.OrderType + "&BeginDate=" + searchData.BeginDate + "&EndDate=" + searchData.EndDate + 
+            const response = await axios.get("Request/ListOrders?" + "OrderType=" + searchData.OrderType + "&BeginDate=" + searchData.BeginDate + "&EndDate=" + searchData.EndDate +
                 "&OrderStatus=" + searchData.OrderStatus + "&currentPage=" + searchData.currentPage + "&perPage=" + searchData.perPage + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.Orders = []
-                    let data = response.data;
-                    
-                    if(data.length > 0) {
-                        for (let key in data) {
-                            data[key].key = key;
-                            commit("updateOrderList", data[key]);
-                        }
-                    } else {
-                        dispatch("sessionControl");
-                    }
-
-                    return response.data
-            })
+            state.Orders = []
+            let data = response.data
+            if (data.length > 0) {
+                for (let key in data) {
+                    data[key].key = key
+                    commit("updateOrderList", data[key])
+                }
+            } else {
+                dispatch("sessionControl")
+            }
+            return response.data
         },
-        updateOrder({ state }, updateData ){
+        async updateOrder({ state }, updateData ){
             //Talep Güncelle
-            return axios.post("Request/UpdateOrder?" + "OrderId=" + updateData.OrderId + "&Note=" + updateData.Note + 
+            const response = await axios.post("Request/UpdateOrder?" + "OrderId=" + updateData.OrderId + "&Note=" + updateData.Note +
                 "&OrderStatus=" + updateData.OrderStatus + "&UserId=" + state.loginUserId + "&SessionKey=" + state.SessionKey)
+            return response.data
         },
-        getOrdersInfo({ commit, state, dispatch }, selectedOrder){
+        async getOrdersInfo({ commit, state, dispatch }, selectedOrder){
             //Talep Detay Bilgileri
-            return axios.get("Request/OrderInfo?" + "OrderId=" + selectedOrder.OrderId + "&OrderType=" + selectedOrder.OrderType + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.OrderInfo = []
-                    let data = response.data;
-                    
-                    if(data.length > 0) {
-                        for (let key in data) {
-                            commit("updateOrderInfo", data[key]);
-                        }
-                    } else {
-                        dispatch("sessionControl");
-                    }
-            })
+            const response = await axios.get("Request/OrderInfo?" + "OrderId=" + selectedOrder.OrderId + "&OrderType=" + selectedOrder.OrderType + "&SessionKey=" + state.SessionKey)
+            state.OrderInfo = []
+            let data = response.data
+            if (data.length > 0) {
+                for (let key in data) {
+                    commit("updateOrderInfo", data[key])
+                }
+            } else {
+                dispatch("sessionControl")
+            }
         },
         getOrderLog({ commit, state, dispatch }, selectedOrder){
             //Talep Detay Bilgileri
@@ -258,26 +250,21 @@ const store = new Vuex.Store({
         },
 
         //Kullanıcı Yönetimi
-        getUsersList({ commit, state, dispatch }, searchData){
+        async getUsersList({ commit, state, dispatch }, searchData){
             //Kullanıcı Listesini yükle
-            return axios.get("User/ListUser?" + "UserId=" + searchData.UserId + "&UserName=" + searchData.UserName + "&Mail=" + searchData.Mail + 
-                "&Name=" + searchData.Name + "&RoleId=" + searchData.RoleId + "&isActivated=" + searchData.isActivated + 
+            const response = await axios.get("User/ListUser?" + "UserId=" + searchData.UserId + "&UserName=" + searchData.UserName + "&Mail=" + searchData.Mail +
+                "&Name=" + searchData.Name + "&RoleId=" + searchData.RoleId + "&isActivated=" + searchData.isActivated +
                 "&currentPage=" + searchData.currentPage + "&perPage=" + searchData.perPage + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.Users = []
-                    let data = response.data;
-                    
-                    if(data.length > 0) {
-                        for (let key in data) {
-                            commit("updateUserList", data[key]);
-                        }
-                    } else {
-                        dispatch("sessionControl");
-                    }
-
-                    return response.data
+            state.Users = []
+            let data = response.data
+            if (data.length > 0) {
+                for (let key in data) {
+                    commit("updateUserList", data[key])
                 }
-            )
+            } else {
+                dispatch("sessionControl")
+            }
+            return response.data
         },
         getAdminsList({ commit, state, dispatch }){
             //Kullanıcı Listesini yükle
@@ -296,55 +283,49 @@ const store = new Vuex.Store({
                 }
             )
         },
-        getRolesList({ commit, state }){
+        async getRolesList({ commit, state }){
             //Hava Alanı Verilerini yükle
-            axios.get("User/ListRole")
-                .then(response => {
-                    state.Roles = []
-                    let data = response.data;
-                    
-                    for (let key in data) {
-                        commit("updateRoleList", data[key]);
-                    }
-            })
+            const response = await axios.get("User/ListRole")
+            state.Roles = []
+            state.LoadedFirstTime = false
+            let data = response.data
+            for (let key in data) {
+                commit("updateRoleList", data[key])
+            }
         },
-        UpdateUser({ state }, updateData ){
-            return axios.post("User/UpdateUser?" + "UserId=" + updateData.UserId + "&UserName=" + updateData.UserName + "&Password=" + updateData.Password + 
+        async UpdateUser({ state }, updateData ){
+            const response = await axios.post("User/UpdateUser?" + "UserId=" + updateData.UserId + "&UserName=" + updateData.UserName + "&Password=" + updateData.Password +
                 "&Mail=" + updateData.Mail + "&FirstName=" + updateData.FirstName + "&LastName=" + updateData.LastName + "&Language=" + updateData.Language +
-                "&DateOfBirth=" + updateData.DateOfBirth + "&Address=" + updateData.Address + "&PhoneNumber=" + updateData.PhoneNumber + 
+                "&DateOfBirth=" + updateData.DateOfBirth + "&Address=" + updateData.Address + "&PhoneNumber=" + updateData.PhoneNumber +
                 "&RoleId=" + updateData.RoleId + "&DB_User=" + state.loginUserId + "&SessionKey=" + state.SessionKey)
+            return response.data
         },
 
         //Genel Aktif Pasif işlemleri
         SetActivePassive({ state }, payload) {
-            axios.post("HelisData/SetActivePassive?" + "Type=" + payload.Active + "&table=" + state.CurrentTable + "&ID=" + payload.ID + 
+            return axios.post("HelisData/SetActivePassive?" + "Type=" + payload.Active + "&table=" + state.CurrentTable + "&ID=" + payload.ID + 
                 "&DB_User=" + state.loginUserId+ "&SessionKey=" + state.SessionKey)
         },
 
         //Modüller
-        ListFields({ commit, state }){
-            return axios.get("Module/ListFields")
-                .then(response => {
-                    state.Fields = []
-                    let data = response.data;
-                    for (let row in data) {
-                        data[row].key = data[row].keyValue;
-                        commit("updateFields", data[row]);
-                    }
-            })
+        async ListFields({ commit, state }){
+            const response = await axios.get("Module/ListFields")
+            state.Fields = []
+            let data = response.data
+            for (let row in data) {
+                data[row].key = data[row].keyValue
+                commit("updateFields", data[row])
+            }
         },
-        ListFieldsByTbl({ commit, state, dispatch }, tableName){
-            return axios.get("Module/ListFields?" + "tableName=" + tableName)
-                .then(response => {
-                    state.Fields = []
-                    let data = response.data;
-                    for (let row in data) {
-                        data[row].key = data[row].keyValue;
-                        commit("updateFields", data[row]);
-                    }
-                    
-                    dispatch(state.CurrentModule)
-            })
+        async ListFieldsByTbl({ commit, state, dispatch }, tableName){
+            const response = await axios.get("Module/ListFields?" + "tableName=" + tableName)
+            state.Fields = []
+            let data = response.data
+            for (let row in data) {
+                data[row].key = data[row].keyValue
+                commit("updateFields", data[row])
+            }
+            dispatch(state.CurrentModule)
         },
         ListProvinces({ commit, state }){
             axios.get("Module/ListProvince")
@@ -418,27 +399,19 @@ const store = new Vuex.Store({
                     dispatch("ListMansions")
             })
         },
-        UpdateModule({ state, dispatch }, payload){
-            return axios.post("Module/Update?tableName=" + state.CurrentTable + "&updateInfo=" + payload.updateInfo + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.ModuleData = []
-                    let data = response.data;
-                    
-                    dispatch(state.CurrentModule)
-
-                    return data
-            })
+        async UpdateModule({ state, dispatch }, payload){
+            const response = await axios.post("Module/Update?tableName=" + state.CurrentTable + "&updateInfo=" + payload.updateInfo + "&SessionKey=" + state.SessionKey)
+            state.ModuleData = []
+            let data = response.data
+            dispatch(state.CurrentModule)
+            return data
         },
-        NewModule({ state, dispatch }, payload){
-            return axios.post("Module/New?tableName=" + state.CurrentTable + "&insertInfo=" + payload.insertInfo + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.ModuleData = []
-                    let data = response.data;
-                    
-                    dispatch(state.CurrentModule)
-
-                    return data
-            })
+        async NewModule({ state, dispatch }, payload){
+            const response = await axios.post("Module/New?tableName=" + state.CurrentTable + "&insertInfo=" + payload.insertInfo + "&SessionKey=" + state.SessionKey)
+            state.ModuleData = []
+            let data = response.data
+            dispatch(state.CurrentModule)
+            return data
         },
         AddPicture({ state }, image) {
             return axios.post("Module/AddPicture?image=" + image.url + "&SessionKey=" + state.SessionKey)
@@ -463,10 +436,11 @@ const store = new Vuex.Store({
                     for (let key in data) {
                         commit("updatePossessions", data[key]);
                     }
+                    return data
             })
         },
-        AddPossession({ state }, payload) {
-            return axios.post("Property/AddPossession?MansionId=" + payload.MansionId + "&BlockId=" + payload.BlockId + "&No=" + payload.No + "&UserId=" + payload.UserId + 
+        async AddPossession({ state }, payload) {
+            await axios.post("Property/AddPossession?MansionId=" + payload.MansionId + "&BlockId=" + payload.BlockId + "&No=" + payload.No + "&UserId=" + payload.UserId + 
                 "&PossessionType=" + payload.PossessionType + "&IsSoldable=" + payload.IsSoldable + "&Info=" + payload.Info + "&SessionKey=" + state.SessionKey)
         },
         ListBlocks({ commit, state }, MansionId){
@@ -477,10 +451,12 @@ const store = new Vuex.Store({
                     for (let key in data) {
                         commit("updateBlocks", data[key]);
                     }
+                    return data
             })
         },
-        AddBlock({ state }, payload) {
-            return axios.post("Property/AddBlock?MansionId=" + payload.MansionId + "&Name=" + payload.BlockName + "&SessionKey=" + state.SessionKey)
+        async AddBlock({ state }, payload) {
+            const response = await axios.post("Property/AddBlock?MansionId=" + payload.MansionId + "&Name=" + payload.BlockName + "&SessionKey=" + state.SessionKey)
+            return response.data
         },
         PossessionInfo({ commit, state }, PossessionId) {
             axios.get("Property/PossessionInfo?PossessionId=" + PossessionId + "&SessionKey=" + state.SessionKey)
@@ -499,15 +475,18 @@ const store = new Vuex.Store({
                     }
                 })
         },
-        AcceptRequest({ state }, AvailableId) {
-            return axios.post("Property/AcceptRequest?AvailableId=" + AvailableId + "&SessionKey=" + state.SessionKey)
+        async AcceptRequest({ state }, AvailableId) {
+            const response = await axios.post("Property/AcceptRequest?AvailableId=" + AvailableId + "&SessionKey=" + state.SessionKey)
+            return response.data
         },
-        RejectRequest({ state }, AvailableId) {
-            return axios.post("Property/RejectRequest?AvailableId=" + AvailableId + "&SessionKey=" + state.SessionKey)
+        async RejectRequest({ state }, AvailableId) {
+            const response = await axios.post("Property/RejectRequest?AvailableId=" + AvailableId + "&SessionKey=" + state.SessionKey)
+            return response.data
         },
-        UpdateRentable({ state }, RentData ) {
-            return axios.post("Property/UpdateRentable?" + "RequestId=" + RentData.RequestId + "&Status=" + RentData.Status + 
+        async UpdateRentable({ state }, RentData ) {
+            const response = await axios.post("Property/UpdateRentable?" + "RequestId=" + RentData.RequestId + "&Status=" + RentData.Status +
                 "&SessionKey=" + state.SessionKey)
+            return response.data
         },
 
         //Aktiviteler Sayfası
@@ -581,11 +560,12 @@ const store = new Vuex.Store({
             )
         },
         getRoleList(state){
-            return state.Roles;
+            return state.roleId == 1 ? state.Roles : 
+                state.Roles.filter(x => x.RoleId != 1 && x.RoleId != 4 ) ;
         },
         getRoleById: state => RoleId => {
             return state.Roles.find(element => 
-                element.RoleId === RoleId
+                element.RoleId == RoleId
             )
         },
         getModuleData(state){

@@ -17,7 +17,7 @@
         name: "App",
         data() {
             return {
-                menu: [
+                menuItems: [
                     {
                         header: true,
                         title: "Menü",
@@ -43,6 +43,7 @@
                     {
                         title: "Hizmet Yönetimi",
                         icon: "m1 fa fa-list-ul",
+                        superadmin: true,
                         child: [
                             {
                                 href: "/modules/il",
@@ -94,7 +95,8 @@
                         href: "/activities",
                         title: "Aktivite Yönetimi",
                         icon: "m1 fas fas fa-hiking",
-                        tableName: "Tbl_User"
+                        tableName: "Tbl_User",
+                        superadmin: true,
                     },
                     {
                         href: "#",
@@ -111,6 +113,18 @@
                 return {
                     'd-none': !this.$store.getters.isAuthenticated
                 }
+            },
+            menu () {
+                if (this.$store.state.Roles.length != 0) {
+                    let role = this.$store.getters.getRoleById(localStorage.RoleId).RoleName;
+                    if (role != 'Superadmin') {
+                        return this.menuItems.filter((item) => {
+                            return !item.superadmin
+                        })
+                    }
+                }
+
+                return this.menuItems // return all the items
             },
         },
         methods: {

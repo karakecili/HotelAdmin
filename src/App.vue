@@ -162,6 +162,7 @@
     }
     .pageContainer {
         width: 100%;
+        padding-left: 5px;
     }
     .paging {
         height: 40px;
@@ -169,5 +170,8 @@
         display: flex;
         flex-direction: row;
         gap: 20px;
+    }
+    .buttonGroup {
+        margin: 30px 0;
     }
 </style>
