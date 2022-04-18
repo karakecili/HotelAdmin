@@ -1,5 +1,5 @@
 <template>
-    <div class="container" style="margin-top: 5px; margin-bottom: 5px;">
+    <div class="pageContainer">
         <div v-if="!mansionSelected">
             <b-table striped hover :items="getMansions" :fields="fields" @row-clicked="selectRow" >
 

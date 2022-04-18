@@ -46,8 +46,8 @@
                             </td>
                         </tr>
                         <tr v-if="getUserList.length == 0">
-                            <td colspan="8" style="background-color: #fff4d0; color: #664d03;">
-                                <div class="alert" style="background-color: #f2e8c5; border-color: #f2e8c5; color: #664d03; text-align: center;">
+                            <td colspan="8" class="noRequest">
+                                <div class="alert noRequestDiv">
                                     <strong>Filtreye Uygun Bir Kayıt Bulunamadı</strong>
                                 </div>
                             </td>

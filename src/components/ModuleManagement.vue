@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="pageContainer">
         <b-table striped hover :items="getModuleData" :fields="getFieldsByTbl.filter(x => x.tableShow)">
             <!-- Sıralama -->
             <template #cell(index)="data">
@@ -8,7 +8,7 @@
             
             <template #head(Details)>
                 İşlemler 
-                <button class="btn-primary" style="border-radius: 12px; border: solid 2px #0d6efd; background-color: #007bff" title="Yeni Kayıt" @click="openNew($event.target)">
+                <button class="btn-primary newModule" title="Yeni Kayıt" @click="openNew($event.target)">
                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                 </button>
             </template>

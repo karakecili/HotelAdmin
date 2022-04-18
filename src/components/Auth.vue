@@ -1,10 +1,10 @@
 <template>
-    <div class="container">
+    <div class="pageContainer">
         <div class="row  mt-5">
             <div class="col-md-4 offset-4 card card-primary p-3 border"
                  :class="{'border-primary' : isUser, 'border-success' : !isUser }">
                         
-                <img style="width: 200px; align-self: center;" alt="logo" src="../assets/helisLogo.png"/>
+                <img class="authLogo" alt="logo" src="../assets/helisLogo.png"/>
                 <hr>
                 <form @submit.prevent="onSubmit">
                     <div class="loginForm">
@@ -25,10 +25,6 @@
                         >
                     </div>
                     <div class="button-container d-flex  flex-column align-items-center">
-                        <!-- <button type="submit" :class="{'btn-primary' : isUser, 'btn-success' : !isUser }"
-                                class="btn btn-block mb-2">
-                            {{ isUser ? 'Giriş Yap' : 'Kayıt Ol' }}
-                        </button> -->
                         <button type="submit" :class="{'btn-primary' : !isForgotten, 'btn-danger' : isForgotten }"
                                 class="btn btn-block mb-2">
                             {{ !isForgotten ? 'Giriş Yap' : 'Mail Sıfırla' }}

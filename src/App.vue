@@ -174,4 +174,33 @@
     .buttonGroup {
         margin: 30px 0;
     }
+    .authLogo {
+        width: 200px; 
+        align-self: center;
+    }
+    .newModule {
+        border-radius: 12px; 
+        border: solid 2px #0d6efd; 
+        background-color: #007bff
+    }
+    .requestLogs {
+        max-height: 250px; 
+        overflow-y: auto;
+    }
+    .noRequest {
+        background-color: #fff4d0 !important
+    }
+    .noRequestDiv {
+        background-color: #f2e8c5; 
+        border-color: #f2e8c5; 
+        color: #664d03; 
+        text-align: center;
+    }
+    .fullWidth {
+        width: 100%;
+    }
+    .DDM {
+        padding: 0; 
+        border: 3px solid #460df4;
+    }
 </style>

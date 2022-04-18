@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="pageContainer">
         <b-table striped hover :items="getActivityType" :fields="ActivityFields">
             <template #cell(index)="data">
                 {{ data.index + 1 }}

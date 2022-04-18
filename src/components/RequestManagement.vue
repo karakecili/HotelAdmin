@@ -41,15 +41,15 @@
                         <td> {{ getOrderStatusById(Order.OrderStatus).StatusName }} </td>
                         <td>
                             <div class="input-group mb-3">
-                                <div class="input-group-prepend dropleft" style="width: 100%;" ref="dropleft">
-                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" 
-                                    aria-expanded="false" style="width: 100%;" @click="selectOrder(Order)"> İşlem</button>
-                                    <div class="dropdown-menu" style="padding: 0; border: 3px solid #460df4;" @click="$event.stopPropagation()" ref="dropdown">
+                                <div class="input-group-prepend dropleft fullWidth" ref="dropleft">
+                                    <button class="btn btn-outline-secondary dropdown-toggle fullWidth" type="button" data-toggle="dropdown" aria-haspopup="true" 
+                                    aria-expanded="false" @click="selectOrder(Order)"> İşlem</button>
+                                    <div class="dropdown-menu DDM" @click="$event.stopPropagation()" ref="dropdown">
                                         <table class="table-edited">
                                             <tr style="background-color: #0062cc;">
                                                 <td><label>Durum:</label></td>
                                                 <td>
-                                                    <select name="" v-model="selectedOrder.OrderStatus" style="width: 100%;"> 
+                                                    <select name="" v-model="selectedOrder.OrderStatus" class="fullWidth"> 
                                                         <option v-for="orderStatus in getOrderStatus" :value="orderStatus.OrderStatus" :key="orderStatus.OrderStatus">{{ orderStatus.StatusName }}
                                                         </option>
                                                     </select>
@@ -71,8 +71,8 @@
                         <td> {{ Order.DB_Datetime | formatDate }} </td>
                     </tr>
                     <tr v-if="getOrders.length == 0">
-                        <td colspan="10" style="background-color: #fff4d0; color: #664d03;">
-                            <div class="alert" style="background-color: #f2e8c5; border-color: #f2e8c5; color: #664d03; text-align: center;">
+                        <td colspan="12" class="noRequest">
+                            <div class="alert noRequestDiv">
                                 <strong>Henüz Burada Bir Kayıt Bulamadık</strong>
                             </div>
                         </td>
@@ -80,7 +80,7 @@
                 </tbody>
             </table>
         </div>
-        <div v-if="selectedOrder.OrderId != null" style="max-height: 250px; overflow-y: auto;">
+        <div v-if="selectedOrder.OrderId != null" class="requestLogs">
             <b-card no-body>
                 <b-tabs card justified>
                     <b-tab title="Bilgiler" active>
