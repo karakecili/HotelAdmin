@@ -246,38 +246,38 @@
                 if ('ImageUrl' in this.infoModal.row) {
                     
                     var formData = new FormData();
-                    formData.append("file", this.uploadFile);
-                    // formData.append("FormFile", this.uploadFile);
-                    // formData.append("FileName", this.uploadFile.name);
+                    // formData.append("file", this.uploadFile);
+                    formData.append("FormFile", this.uploadFile);
+                    formData.append("FileName", this.uploadFile.name);
+                    axios.post("Module/Post", formData);
                     // formData.append("selectedfiles", this.uploadFile);
-                    axios.post("Module/UploadFileAsync", formData);
-                    // axios.post("Module/UploadPhoto", this.uploadFile);
                     // axios.post("Module/UploadFileAsync", formData);
+                    // // axios.post("Module/UploadPhoto", this.uploadFile);
+                    // // axios.post("Module/UploadFileAsync", formData);
                     axios({
                     method: "post",
-                    url: "Module/UploadPhoto",
+                    url: "Module/Post",
                     data: formData,
-                    headers: { "Content-Type": "multipart/form-data" },
+                    headers: { "Content-Type": "application/json" },
                     })
                     //TO DO
-                    this.Upload(this.uploadFile)
-                        .then(x => {
-                            console.log([].concat(x))
+                    // this.Upload(this.uploadFile)
+                    //     .then(x => {
+                    //         console.log([].concat(x))
                             
-                    formData.append("FormFile", x[0].FormFile);
-                    formData.append("FileName", x[0].fileName);
-                    // axios.post("Module/Post", formData);
-                    // axios.post("Module/Post", x[0]);
-                    // this.$store.dispatch("AddPicture", formData)
+                    // formData.append("FormFile", x[0].FormFile);
+                    // formData.append("FileName", x[0].fileName);
+                    // // axios.post("Module/Post", x[0]);
+                    // // this.$store.dispatch("AddPicture", formData)
                     
-                        var dataURL = x[0].url
-                        var blob = this.dataURItoBlob(dataURL);
-                        var fd = new FormData();
-                        fd.append("file", blob);
-                        axios.post("Module/Post", fd);
+                    //     var dataURL = x[0].url
+                    //     var blob = this.dataURItoBlob(dataURL);
+                    //     var fd = new FormData();
+                    //     fd.append("file", blob);
+                    //     // axios.post("Module/Post", fd);
                         
-                        }
-                    )
+                    //     }
+                    // )
                 } else {
                     this.$store.dispatch("UpdateModule", { updateInfo: data })
                         .then((response) => {

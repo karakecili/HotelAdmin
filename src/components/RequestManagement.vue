@@ -207,9 +207,11 @@
             },
             setOrder() {
                 this.$store.dispatch("updateOrder", { ...this.selectedOrder })
-                    .then(() =>{
-                            this.$refs.dropleft.filter(x => x.className == "input-group-prepend dropleft show")[0].className = 'input-group-prepend dropleft'
-                            this.$refs.dropdown.filter(x => x.className == "dropdown-menu show")[0].className = 'dropdown-menu'
+                    .then(() => {
+                            // this.$refs.dropleft.filter(x => x.className == "input-group-prepend dropleft show")[0].className = 'input-group-prepend dropleft'
+                            // this.$refs.dropdown.filter(x => x.className == "dropdown-menu show")[0].className = 'dropdown-menu'
+                            this.$refs.dropleft.find(x => x.className.includes("show")).classList.remove('show')
+                            this.$refs.dropdown.find(x => x.className.includes("show")).classList.remove('show')
                             // setTimeout(() => this.getOrdersList(), 1000)   
                             this.getOrdersList()
                         }

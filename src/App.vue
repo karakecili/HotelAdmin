@@ -184,7 +184,7 @@
         background-color: #007bff
     }
     .requestLogs {
-        max-height: 250px; 
+        height: 250px; 
         overflow-y: auto;
     }
     .noRequest {
