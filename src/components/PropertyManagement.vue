@@ -8,21 +8,21 @@
         <div v-else-if="!possessionSelected" class="divPost">
             <div class="divPosHeader">
                 <b-button class="btn btn-danger" @click="mansionSelected=!mansionSelected">Geri</b-button>
-                <b-button class="btn btn-primary" @click="selectMansion(Possession.MansionId)">Onay Listesi</b-button>
+                <b-button class="btn btn-primary" @click="selectMansion(Possession.MansionId)">Onay Bekleyenler</b-button>
                 <span class="spnMansionInfo"> {{ MansionInfo }} </span>
-                <b-button class="btn btn-success" v-b-modal.modalRoom>Yeni Oda</b-button>
+                <b-button class="btn btn-success" v-b-modal.modalRoom>Yeni {{ RoomType }}</b-button>
                 <b-button class="btn btn-success" v-b-modal.modalBlock v-if="selectedRow.IsBlocky">Yeni Blok</b-button>
             </div>
             <div class="divPosBody" :style="selectedRow.IsBlocky ? 'flex-wrap: no-wrap; flex-direction: column;' : 'flex-wrap: wrap; flex-direction: row;'">
                 <div v-if="selectedRow.IsBlocky" class="PosOuter">
                     <div v-for="Block in getBlocks" :key="Block.BlockId" class="PosInner">
                         
-                        <span> {{ Block.Name + ' (' + getPossessionsByBlock(Block.BlockId).length + ' Oda)' }} </span>
+                        <span> {{ Block.Name + ' (' + getPossessionsByBlock(Block.BlockId).length + ' ' + RoomType + ')' }} </span>
                         <div class="PosButtonList">
                             <button 
                                 v-for="Possession in getPossessionsByBlock(Block.BlockId)" 
                                 :key="Possession.PossessionId" 
-                                class="PosButton" 
+                                class="PosButton"   
                                 @click="selectPossession(Possession.PossessionId, Possession.MansionId)"
                             > {{ Possession.No }} </button>
                         </div>
@@ -44,7 +44,7 @@
                 <b-button class="btn btn-danger" @click="possessionSelected=!possessionSelected">Geri</b-button>
                 <span class="spnMansionInfo">
                     <div v-if="IsPossession">
-                        {{ getPossessionInfo.Mansion + " " + (getPossessionInfo.Block == "" ? "" : "Blok: " + getPossessionInfo.Block + " ") + "Oda: " + getPossessionInfo.No }} 
+                        {{ getPossessionInfo.Mansion + " " + (getPossessionInfo.Block == "" ? "" : "Blok: " + getPossessionInfo.Block + " ") + RoomType + ": " + getPossessionInfo.No }} 
                     </div>
                     <div v-else>
                         {{ MansionInfo }} 
@@ -121,7 +121,7 @@
             </div>
         </div>
 
-        <b-modal id="modalRoom" title="Yeni Oda" hide-footer body-class="modalBody">
+        <b-modal id="modalRoom" :title="'Yeni' + RoomType" hide-footer body-class="modalBody">
             <b-container class="modalRoom">
                 
                 <b-form-group label="No:" label-for="input1" label-cols="4" label-cols-lg="2">
@@ -359,6 +359,9 @@
             ...mapGetters(["getMansions", "getPossessionStatus", "getBlocks", "getPossessions", "getPossessionsByBlock", "getPossessionInfo", "getRequestList", "getRentableStatus"]),
             MansionInfo() {
                 return this.selectedRow.Name + " (" + (this.selectedRow.IsBlocky ? this.$store.getters.getBlocks.length + " Blok " : "") + this.$store.getters.getPossessions.length + " Oda)"
+            },
+            RoomType() {
+                return this.selectedRow.RoomType == 1 ? "Oda" : this.selectedRow.RoomType == 2 ? "Bağımsız Bölüm" : ""
             }
         },
         methods: {

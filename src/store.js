@@ -68,6 +68,16 @@ const store = new Vuex.Store({
         CurrentImagePath: "",
         CurrentModule: "",
         LoadedFirstTime: true,
+        RecentRequests: {
+            labels: [],
+            datasets: [{ backgroundColor: [], data: [] }]
+        },
+        FormerRequests: {
+            labels: [],
+            datasets: [{ backgroundColor: [], data: [] }]
+        },
+        RecentUsers: [],
+        FormerUsers: [],
     },
     mutations: {
         setSession(state, data){
@@ -131,6 +141,36 @@ const store = new Vuex.Store({
         },
         updateActivityTypeList(state, item) {
             state.ActivityType.push(item);
+        },
+        updateRecentRequest(state, data) {
+            let labels = []
+            let datasets = [{ backgroundColor: [], data: [] }]
+
+            data.forEach(item => {
+                labels.push(state.OrderStatus.find(e => e.OrderStatus == item.OrderStatus).StatusName)
+                datasets[0].backgroundColor.push('#'+ Math.floor(Math.random()*16777215).toString(16))
+                datasets[0].data.push(item.cnt)
+            }) 
+
+            state.RecentRequests = { labels: labels, datasets: datasets }
+        },
+        updateFormerRequest(state, data) {
+            let labels = []
+            let datasets = [{ backgroundColor: [], data: [] }]
+            
+            data.forEach(item => {
+                labels.push(state.OrderStatus.find(e => e.OrderStatus == item.OrderStatus).StatusName)
+                datasets[0].backgroundColor.push('#'+ Math.floor(Math.random()*16777215).toString(16))
+                datasets[0].data.push(item.cnt)
+            }) 
+
+            state.FormerRequests = { labels: labels, datasets: datasets }
+        },
+        updateRecentUser(state, item) {
+            state.RecentUsers.push(item);
+        },
+        updateFormerUser(state, item) {
+            state.FormerUsers.push(item);
         },
     },
     actions: {
@@ -490,23 +530,80 @@ const store = new Vuex.Store({
         },
 
         //Aktiviteler Sayfası
-        getActivityTypeList({ dispatch, commit, state }) {
-            axios.get("Module/ListActivityTypes")
-                .then(response => {
-                    state.ActivityType = []
-                    let data = response.data;
-                    for (let key in data) {
-                        data[key].key = key;
-                        commit("updateActivityTypeList", data[key]);
-                    }
-                })
-                .catch((error) => {
-                    dispatch("SetError", error)
-                })
+        async getActivityTypeList({ dispatch, commit, state }) {
+            try {
+                const response = await axios.get("Module/ListActivityTypes")
+                state.ActivityType = []
+                let data = response.data
+                for (let key in data) {
+                    data[key].key = key
+                    commit("updateActivityTypeList", data[key])
+                }
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
         UpdateActivityStatus({ state, dispatch }, payload){
             axios.post("Module/UpdateActivityStatus?ActivityTypeId=" + payload.ActivityTypeId + "&Status=" + payload.Status + "&SessionKey=" + state.SessionKey)
                 .then(() => { dispatch("getActivityTypeList") })
+        },
+
+        //Dashboard
+        async RecentRequest({ dispatch, commit, state }) {
+            try {
+                const response = await axios.get("Dashboard/RecentRequest?SessionKey=" + state.SessionKey)
+                state.RecentRequests.labels = []
+                state.RecentRequests.datasets[0].backgroundColor = []
+                state.RecentRequests.datasets[0].data = []
+                let data = response.data;
+                
+                commit("updateRecentRequest", data);
+                return data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async FormerRequest({ dispatch, commit, state }) {
+            try {
+                const response = await axios.get("Dashboard/FormerRequest?SessionKey=" + state.SessionKey)
+                state.RecentRequests.labels = []
+                state.RecentRequests.datasets[0].backgroundColor = []
+                state.RecentRequests.datasets[0].data = []
+                let data = response.data;
+
+                commit("updateFormerRequest", data);
+                return data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async RecentUser({ dispatch, commit, state }) {
+            try {
+                const response = await axios.get("Dashboard/RecentUser?SessionKey=" + state.SessionKey)
+                state.RecentUsers = []
+                let data = response.data;
+                for (let key in data) {
+                    data[key].key = key;
+                    commit("updateRecentUser", data[key]);
+                }
+                return response.data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async FormerUser({ dispatch, commit, state }) {
+            try {
+                const response = await axios.get("Dashboard/FormerUser?SessionKey=" + state.SessionKey)
+                state.FormerUsers = []
+                let data = response.data;
+                for (let key in data) {
+                    data[key].key = key;
+                    commit("updateFormerUser", data[key]);
+                }
+                return response.data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
 
         //Error Management
@@ -634,6 +731,18 @@ const store = new Vuex.Store({
         },
         getActivityType(state) {
             return state.ActivityType;
+        },
+        getRecentRequest(state){
+            return state.RecentRequests;
+        },
+        getFormerRequest(state){
+            return state.FormerRequests;
+        },
+        getRecentUser(state){
+            return state.RecentUsers;
+        },
+        getFormerUser(state){
+            return state.FormerUsers;
         },
     }
 })

@@ -24,6 +24,12 @@
                     },
                     {
                         href: "/",
+                        title: "Dashboard",
+                        icon: "m1 fas fa-chart-bar",
+                        tableName: "Tbl_Order"
+                    },
+                    {
+                        href: "/requests",
                         title: "Talep Yönetimi",
                         icon: "m1 fa fa-calendar-alt",
                         tableName: "Tbl_Order"

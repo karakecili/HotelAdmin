@@ -203,4 +203,18 @@
         padding: 0; 
         border: 3px solid #460df4;
     }
+    .chartPie {
+        width: 100%;
+        text-align: center;
+        &-span {
+            text-align: center;
+        }
+    }
+    .dashboardTable {
+        width: 100%;
+        text-align: center;
+        &-span {
+            text-align: center;
+        }
+    }
 </style>

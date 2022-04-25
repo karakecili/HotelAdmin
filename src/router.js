@@ -5,6 +5,7 @@ import UserManagement from "./components/UserManagement.vue"
 import ModuleManagement from "./components/ModuleManagement.vue"
 import PropertyManagement from "./components/PropertyManagement.vue"
 import ActivityManagement from "./components/ActivityManagement.vue"
+import Dashboard from "./components/Dashboard.vue"
 
 import Auth from "./components/Auth.vue"
 
@@ -20,6 +21,18 @@ export const router = new VueRouter({
     routes: [
         {
             path: "/",
+            name: "Dashboard",
+            component: Dashboard,
+            beforeEnter(to, from, next) {
+                if (store.getters.isAuthenticated) {
+                    next()
+                } else {
+                    next("/auth")
+                }
+            }
+        },
+        {
+            path: "/requests",
             name: "Talep Yönetimi",
             component: RequestManagement,
             beforeEnter(to, from, next) {

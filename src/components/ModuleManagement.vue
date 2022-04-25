@@ -83,12 +83,17 @@
                         </template>
                         <template v-else-if="col.key == 'OwnerUser'"> 
                             <option value="-1" disabled>Lütfen Sahip Seçiniz</option>
-                            <option v-for="admin in getAdminList" :value="admin.UserId" :key="admin">{{ admin.UserName }}</option>
+                            <option v-for="admin in getAdminList" :value="admin.UserId" :key="admin.UserId">{{ admin.UserName }}</option>
                         </template>
                         <template v-else-if="col.key == 'PossessionType'"> 
                             <option value="-1" disabled>Lütfen Statü Seçiniz</option>
                             <option value="3">Firma Sahip Satılık</option>
                             <option value="4">Firma Sahip Kiralık</option>
+                        </template>
+                        <template v-else-if="col.key == 'RoomType'"> 
+                            <option value="-1" disabled>Lütfen Oda Türü Seçiniz</option>
+                            <option value="1">Oda</option>
+                            <option value="2">Bağımsız Bölüm</option>
                         </template>
                        
                     </b-form-select>
@@ -134,9 +139,6 @@
                     ></b-form-file>
                 </b-form-group>
 
-                <!-- TO DO -->
-                <!-- <input type="text" :id=`name-${index}` name="name" v-model="list.name" />
-                {{list.name}} -->
             </div>
     
             <template #modal-footer>
