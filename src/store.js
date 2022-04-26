@@ -53,6 +53,7 @@ const store = new Vuex.Store({
         Blocks: [],
         Possessions: [],
         PossessionInfo: {},
+        RentableInfo: {},
         RequestList: [],
         ActivityType: [],
         DB_Action: [
@@ -128,6 +129,9 @@ const store = new Vuex.Store({
         updatePossessionInfo(state, item) {
             state.PossessionInfo = item;
         },
+        updateRentableInfo(state, item) {
+            state.RentableInfo = item;
+        },
         updateRequestList(state, item) {
             state.RequestList.push(item);
         },
@@ -178,7 +182,7 @@ const store = new Vuex.Store({
             
             let SessionKey = localStorage.getItem("Session")
             if(SessionKey != null) {
-                axios.get("Session/AdminSessionControl?" + "SessionKey=" + SessionKey)
+                return axios.get("Session/AdminSessionControl?" + "SessionKey=" + SessionKey)
                     .then(response => {
                         if(response.data) {
                             commit("setSession", { 
@@ -194,6 +198,8 @@ const store = new Vuex.Store({
                             dispatch("ListFields")
 
                             router.push("/")
+
+                            return true
                         } else {
                             router.push("/auth")
                             localStorage.removeItem("RoleId")
@@ -202,7 +208,9 @@ const store = new Vuex.Store({
                             return false
                         }
                     }
-                )
+                ).catch(error => {
+                    dispatch("SetError", error)
+                })
             }
         },
         async login({ commit, dispatch }, authData){
@@ -272,21 +280,24 @@ const store = new Vuex.Store({
                 dispatch("sessionControl")
             }
         },
-        getOrderLog({ commit, state, dispatch }, selectedOrder){
+        async getOrderLog({ commit, state, dispatch }, selectedOrder){
             //Talep Detay Bilgileri
-            axios.get("Request/OrderLog?" + "OrderId=" + selectedOrder.OrderId + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.OrderLog = []
-                    let data = response.data;
-                    
-                    if(data.length > 0) {
-                        for (let key in data) {
-                            commit("updateOrderLog", data[key]);
-                        }
-                    } else {
-                        dispatch("sessionControl");
+            try {
+                const response = await axios.get("Request/OrderLog?" + "OrderId=" + selectedOrder.OrderId + "&SessionKey=" + state.SessionKey)
+                state.OrderLog = []
+                let data = response.data
+
+                if (data.length > 0) {
+                    for (let key in data) {
+                        commit("updateOrderLog", data[key])
                     }
-            })
+                } else {
+                    dispatch("sessionControl")
+                }
+                return data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
 
         //Kullanıcı Yönetimi
@@ -417,27 +428,24 @@ const store = new Vuex.Store({
                     }
             })
         },
-        ListRestaurants({ commit, state }){
-            axios.get("Module/ListRestaurant")
-                .then(response => {
-                    state.ModuleData = []
-                    let data = response.data;
-                    for (let key in data) {
-                        commit("updateModuleData", data[key]);
-                    }
-            })
+        async ListRestaurants({ commit, state }){
+            const response = await axios.get("Module/ListRestaurant")
+            state.ModuleData = []
+            let data = response.data
+            for (let key in data) {
+                commit("updateModuleData", data[key])
+            }
+            return data
         },
-        ListMansion({ commit, state, dispatch }){
-            axios.get("Module/ListMansion")
-                .then(response => {
-                    state.ModuleData = []
-                    let data = response.data;
-                    for (let key in data) {
-                        commit("updateModuleData", data[key]);
-                    }
-
-                    dispatch("ListMansions")
-            })
+        async ListMansion({ commit, state, dispatch }){
+            const response = await axios.get("Module/ListMansion")
+            state.ModuleData = []
+            let data = response.data
+            for (let key in data) {
+                commit("updateModuleData", data[key])
+            }
+            dispatch("ListMansions")
+            return data
         },
         async UpdateModule({ state, dispatch }, payload){
             const response = await axios.post("Module/Update?tableName=" + state.CurrentTable + "&updateInfo=" + payload.updateInfo + "&SessionKey=" + state.SessionKey)
@@ -458,62 +466,89 @@ const store = new Vuex.Store({
         },
 
         //Mülk Sayfası
-        ListMansions({ commit, state }){
-            axios.get("Property/ListMansions?SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.Mansions = []
-                    let data = response.data;
-                    for (let key in data) {
-                        commit("updateMansions", data[key]);
-                    }
-            })
+        async ListMansions({ commit, state, dispatch }){
+            try {
+                const response = await axios.get("Property/ListMansions?SessionKey=" + state.SessionKey)
+                state.Mansions = []
+                let data = response.data
+                for (let key in data) {
+                    commit("updateMansions", data[key])
+                }
+                return data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
-        ListPossessions({ commit, state }, MansionId){
-            axios.get("Property/ListPossessions?MansionId=" + MansionId + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.Possessions = []
-                    let data = response.data;
-                    for (let key in data) {
-                        commit("updatePossessions", data[key]);
-                    }
-                    return data
-            })
+        async ListPossessions({ commit, state, dispatch }, MansionId){
+            try {
+                const response = await axios.get("Property/ListPossessions?MansionId=" + MansionId + "&SessionKey=" + state.SessionKey)
+                state.Possessions = []
+                let data = response.data
+                for (let key in data) {
+                    commit("updatePossessions", data[key])
+                }
+                return data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
-        async AddPossession({ state }, payload) {
-            await axios.post("Property/AddPossession?MansionId=" + payload.MansionId + "&BlockId=" + payload.BlockId + "&No=" + payload.No + "&UserId=" + payload.UserId + 
-                "&PossessionType=" + payload.PossessionType + "&IsSoldable=" + payload.IsSoldable + "&Info=" + payload.Info + "&SessionKey=" + state.SessionKey)
+        async AddPossession({ state, dispatch }, payload) {
+            try {
+                await axios.post("Property/AddPossession?MansionId=" + payload.MansionId + "&BlockId=" + payload.BlockId + "&No=" + payload.No + "&UserId=" + payload.UserId + 
+                    "&PossessionType=" + payload.PossessionType + "&IsSoldable=" + payload.IsSoldable + "&Info=" + payload.Info + "&SessionKey=" + state.SessionKey)
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
-        ListBlocks({ commit, state }, MansionId){
-            axios.get("Property/ListBlocks?MansionId=" + MansionId + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.Blocks = []
-                    let data = response.data;
-                    for (let key in data) {
-                        commit("updateBlocks", data[key]);
-                    }
-                    return data
-            })
+        async ListBlocks({ commit, state, dispatch }, MansionId){
+            try {
+                const response = await axios.get("Property/ListBlocks?MansionId=" + MansionId + "&SessionKey=" + state.SessionKey)
+                state.Blocks = []
+                let data = response.data
+                for (let key in data) {
+                    commit("updateBlocks", data[key])
+                }
+                return data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
         async AddBlock({ state }, payload) {
             const response = await axios.post("Property/AddBlock?MansionId=" + payload.MansionId + "&Name=" + payload.BlockName + "&SessionKey=" + state.SessionKey)
             return response.data
         },
-        PossessionInfo({ commit, state }, PossessionId) {
-            axios.get("Property/PossessionInfo?PossessionId=" + PossessionId + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    let data = response.data
-                    commit("updatePossessionInfo", data)
-                })
+        async PossessionInfo({ commit, state, dispatch }, PossessionId) {
+            try {
+                const response = await axios.get("Property/PossessionInfo?PossessionId=" + PossessionId + "&SessionKey=" + state.SessionKey)
+                let data = response.data
+                commit("updatePossessionInfo", data)
+                return data
+            }  catch (error) {
+                dispatch("SetError", error)
+            }
         },
-        RequestList({ commit, state }, payload) {
-            axios.get("Property/RequestList?PossessionId=" + payload.PossessionId + "&MansionId=" + payload.MansionId + "&SessionKey=" + state.SessionKey)
-                .then(response => {
-                    state.RequestList = []
-                    let data = response.data;
-                    for (let key in data) {
-                        commit("updateRequestList", data[key]);
-                    }
-                })
+        async RentableInfo({ commit, state, dispatch }, PossessionId) {
+            try {
+                const response = await axios.get("Property/RentableInfo?PossessionId=" + PossessionId + "&SessionKey=" + state.SessionKey)
+                let data = response.data
+                commit("updateRentableInfo", data)
+                return data
+            }  catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async RequestList({ commit, state, dispatch }, payload) {
+            try {
+                const response = await axios.get("Property/RequestList?PossessionId=" + payload.PossessionId + "&MansionId=" + payload.MansionId + "&SessionKey=" + state.SessionKey)
+                state.RequestList = []
+                let data = response.data
+                for (let key in data) {
+                    commit("updateRequestList", data[key])
+                }
+                return data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
         async AcceptRequest({ state }, AvailableId) {
             const response = await axios.post("Property/AcceptRequest?AvailableId=" + AvailableId + "&SessionKey=" + state.SessionKey)
@@ -566,9 +601,9 @@ const store = new Vuex.Store({
         async FormerRequest({ dispatch, commit, state }) {
             try {
                 const response = await axios.get("Dashboard/FormerRequest?SessionKey=" + state.SessionKey)
-                state.RecentRequests.labels = []
-                state.RecentRequests.datasets[0].backgroundColor = []
-                state.RecentRequests.datasets[0].data = []
+                state.FormerRequests.labels = []
+                state.FormerRequests.datasets[0].backgroundColor = []
+                state.FormerRequests.datasets[0].data = []
                 let data = response.data;
 
                 commit("updateFormerRequest", data);
@@ -709,6 +744,9 @@ const store = new Vuex.Store({
         },
         getPossessionInfo(state){
             return state.PossessionInfo;
+        },
+        getRentableInfo(state){
+            return state.RentableInfo;
         },
         getRentableStatus(state) {
             return state.RentableStatus;

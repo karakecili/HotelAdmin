@@ -27,8 +27,8 @@
                             > {{ Possession.No }} </button>
                         </div>
                     </div>
-
                 </div>
+
                 <button 
                     v-else 
                     v-for="Possession in getPossessions" 
@@ -37,7 +37,6 @@
                     @click="selectPossession(Possession.PossessionId, Possession.MansionId)"
                 > {{ Possession.No }} </button>
             </div>
-
         </div>
         <div v-else>
             <div class="divPosHeader">
@@ -56,20 +55,17 @@
                     <span>{{ "Mülk Sahibi: " + getPossessionInfo.OwnerInfo.UserName + " (" + getPossessionInfo.OwnerInfo.FirstName + " " + getPossessionInfo.OwnerInfo.LastName + ")" }}</span>
                     <span>{{ "Mülk Statüsü: " + getPossessionInfo.PossessionTypeDesc }}</span>
                     <div style="display: none">
-                            <b-form-select
-                                id="input-5"
-                                v-model="getPossessionInfo.PossessionType"
-                            >
-                                <option v-for="Possession in getPossessionStatus" :value="Possession.PossessionStatus" :key="Possession.PossessionStatus">
-                                    {{ Possession.PossessionName }}
-                                </option>
-                            </b-form-select>
+                        <b-form-select id="input-5" v-model="getPossessionInfo.PossessionType">
+                            <option v-for="Possession in getPossessionStatus" :value="Possession.PossessionStatus" :key="Possession.PossessionStatus">
+                                {{ Possession.PossessionName }}
+                            </option>
+                        </b-form-select>
                     </div>
                 </div>
                 <div class="PostRent" v-if="getPossessionInfo.RentableRequest">
                     <span> Kiralama Durumu: </span>
                     <b-form-select
-                        id="input-5"
+                        id="input-51"
                         v-model="getPossessionInfo.RentableRequest.Status"
                         class="PostRent-Select"
                         @change="UpdateRentable(getPossessionInfo.RentableRequest.Status, getPossessionInfo.RentableRequest.RequestId)"
@@ -79,6 +75,10 @@
                         </option>
                     </b-form-select>
                 </div>
+                <div class="PosInfo" v-if="getPossessionInfo.RentableRequest && getRentableInfo.TimeList.length > 0">
+                    <span> Müsait Olmayan Günler: </span>
+                    <span v-for="time in getRentableInfo.TimeList" :key="time.id">{{ time.BeginDate | formatDate }} - {{ time.EndDate | formatDate }}</span>
+                </div>
                 <div class="PosBooked" v-if="getPossessionInfo.BookingInfo">
                     {{ "Kiracı Bilgisi: " + getPossessionInfo.BookedInfo.UserName + " (" + getPossessionInfo.BookedInfo.FirstName + " " + getPossessionInfo.BookedInfo.LastName + ")" }}
                     {{ "Kira Süresi:    " + (getPossessionInfo.BookingInfo.BeginDate | formatDate) + " - " + (getPossessionInfo.BookingInfo.EndDate | formatDate) }}
@@ -87,7 +87,6 @@
             <div class="PosRequests">
                 <b>Gelen Talepler</b>
                 <b-table striped hover :items="getRequestList" :fields="PosFields" @row-clicked="selectRow" >
-
                     <template #cell(Phone)="row">
                         {{ row.value | formatToPhone }}
                     </template>
@@ -123,7 +122,6 @@
 
         <b-modal id="modalRoom" :title="'Yeni' + RoomType" hide-footer body-class="modalBody">
             <b-container class="modalRoom">
-                
                 <b-form-group label="No:" label-for="input1" label-cols="4" label-cols-lg="2">
                     <b-form-input 
                         id="input1" 
@@ -189,16 +187,15 @@
                     <b-form-input id="input2" v-model="Possession.Info" type="text" debounce="500" required></b-form-input>
                 </b-form-group>
             </b-container>
-                <hr>
-                <b-container class="modalFooter">
-                    <b-button variant="danger" class="float-left" @click="ResetPossession()">
-                        Kapat
-                    </b-button>
-                    <b-button variant="success" class="float-right" @click="AddPossession">
-                        Kaydet
-                    </b-button>
-                </b-container>
-            
+            <hr>
+            <b-container class="modalFooter">
+                <b-button variant="danger" class="float-left" @click="ResetPossession()">
+                    Kapat
+                </b-button>
+                <b-button variant="success" class="float-right" @click="AddPossession">
+                    Kaydet
+                </b-button>
+            </b-container>
         </b-modal>
 
         <b-modal id="modalBlock" title="Yeni Blok" hide-footer body-class="modalBody">
@@ -356,7 +353,7 @@
             }
         },
         computed: {
-            ...mapGetters(["getMansions", "getPossessionStatus", "getBlocks", "getPossessions", "getPossessionsByBlock", "getPossessionInfo", "getRequestList", "getRentableStatus"]),
+            ...mapGetters(["getMansions", "getPossessionStatus", "getBlocks", "getPossessions", "getPossessionsByBlock", "getPossessionInfo", "getRentableInfo", "getRequestList", "getRentableStatus"]),
             MansionInfo() {
                 return this.selectedRow.Name + " (" + (this.selectedRow.IsBlocky ? this.$store.getters.getBlocks.length + " Blok " : "") + this.$store.getters.getPossessions.length + " Oda)"
             },
@@ -439,6 +436,11 @@
                 this.selectedPossessionId = PossessionId
                 this.selectedMansionId = MansionId
                 this.$store.dispatch("PossessionInfo", PossessionId)
+                    .then(res => {
+                        if (res.RentableRequest) {
+                            this.$store.dispatch("RentableInfo", PossessionId)
+                        }
+                    })
                 this.$store.dispatch("RequestList", { PossessionId, MansionId })
                 this.IsPossession = true
                 this.possessionSelected = true
