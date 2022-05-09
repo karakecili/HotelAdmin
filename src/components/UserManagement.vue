@@ -5,16 +5,42 @@
                     
                 <table class="table table-hover table-striped table-bordered">
                     <thead>
-                        <td>Kullanıcı</td>
-                        <td>Ad-Soyad</td>
-                        <td>Mail</td>
+                        <td>Kullanıcı
+                            <b-dropdown :variant="searchData.UserName.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                                <template #button-content>
+                                    <i class="fas fa-filter"></i>
+                                </template>
+                                <input type="text" v-model="searchData.UserName" @input="getUsersList">
+                            </b-dropdown>
+                        </td>
+                        <td>Ad-Soyad
+                            <b-dropdown :variant="searchData.Name.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                                <template #button-content>
+                                    <i class="fas fa-filter"></i>
+                                </template>
+                                <input type="text" v-model="searchData.Name" @input="getUsersList">
+                            </b-dropdown>
+                        </td>
+                        <td>Mail
+                            <b-dropdown :variant="searchData.Mail.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                                <template #button-content>
+                                    <i class="fas fa-filter"></i>
+                                </template>
+                                <input type="text" v-model="searchData.Mail" @input="getUsersList">
+                            </b-dropdown>
+                        </td>
                         <td>Telefon</td>
                         <td>Rol
-                            <select name="" id="slct_role" @change="getUsersList" v-model="searchData.RoleId"> 
-                                <option selected value="null">Hepsi</option>
-                                <option v-for="role in getRoleList" :value="role.RoleId" :key="role.RoleId">{{ role.Description }}
-                                </option>
-                            </select>
+                            <b-dropdown :variant="searchData.RoleId != null ? 'primary' : 'outline-primary'" text="Dropdown">
+                                <template #button-content>
+                                    <i class="fas fa-filter"></i>
+                                </template>
+                                <select name="" id="slct_role" @change="getUsersList" v-model="searchData.RoleId"> 
+                                    <option selected :value="null">Hepsi</option>
+                                    <option v-for="role in getRoleList" :value="role.RoleId" :key="role.RoleId">{{ role.Description }}
+                                    </option>
+                                </select>
+                            </b-dropdown>
                         </td>
                         <td>Kayıt Tarihi</td>
                         <td>Son İşlem Tarihi</td>

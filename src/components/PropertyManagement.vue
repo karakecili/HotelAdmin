@@ -455,16 +455,15 @@
             AcceptRequest(AvailableId) {
                 this.$store.dispatch("AcceptRequest", AvailableId)
                     .then((response) => {
-                        var data = response.data
-                        if (data.AvailableId > 0) {
+                        if (response.ErrorCode) {
+                            this.warningText = response.ErrorMsg
+                            this.$bvModal.show('modalWarning')
+                        } else {
                             if (this.IsPossession) {
                                 this.$store.dispatch("RequestList", { PossessionId: this.selectedPossessionId, MansionId: this.selectedMansionId })
                             } else {
                                 this.$store.dispatch("RequestList", { PossessionId: '', MansionId: this.selectedMansionId })
                             }
-                        } else {
-                            this.warningText = data.ErrorMsg
-                            this.$bvModal.show('modalWarning')
                         }
                     })
             },

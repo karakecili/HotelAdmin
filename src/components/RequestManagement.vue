@@ -6,24 +6,63 @@
                 <thead>
                     <td>TalepId</td>
                     <td>Talep Türü
-                        <select name="" id="slct_orderType" @change="getOrdersList" v-model="searchData.OrderType"> 
-                            <option selected  value="null">Hepsi</option>
-                            <option v-for="orderType in getOrderTypes" :value="orderType.OrderType" :key="orderType.OrderType">{{ orderType.OrderName }}
-                            </option>
-                        </select>
+                        <b-dropdown :variant="searchData.OrderType != null ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <template #button-content>
+                                <i class="fas fa-filter"></i>
+                            </template>
+                            <select name="" id="slct_orderType" @change="getOrdersList" v-model="searchData.OrderType"> 
+                                <option selected :value="null">Hepsi</option>
+                                <option v-for="orderType in getOrderTypes" :value="orderType.OrderType" :key="orderType.OrderType">{{ orderType.OrderName }}
+                                </option>
+                            </select>
+                        </b-dropdown>
                     </td>
-                    <td>Kullanıcı</td>
-                    <td>Ad-Soyad</td>
-                    <td>Mail</td>
+                    <td>Kullanıcı
+                        <b-dropdown :variant="searchData.UserName.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <template #button-content>
+                                <i class="fas fa-filter"></i>
+                            </template>
+                            <input type="text" v-model="searchData.UserName" @input="getOrdersList">
+                        </b-dropdown>
+                    </td>
+                    <td>Ad-Soyad
+                        <b-dropdown :variant="searchData.Name.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <template #button-content>
+                                <i class="fas fa-filter"></i>
+                            </template>
+                            <input type="text" v-model="searchData.Name" @input="getOrdersList">
+                        </b-dropdown>
+                    </td>
+                    <td>Mail
+                        <b-dropdown :variant="searchData.Mail.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <template #button-content>
+                                <i class="fas fa-filter"></i>
+                            </template>
+                            <input type="text" v-model="searchData.Mail" @input="getOrdersList">
+                        </b-dropdown>
+                        
+                    </td>
                     <td>Telefon</td>
-                    <td>Oda</td>
+                    <td>Oda
+                        <b-dropdown :variant="searchData.Room.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <template #button-content>
+                                <i class="fas fa-filter"></i>
+                            </template>
+                            <input type="text" v-model="searchData.Room" @input="getOrdersList">
+                        </b-dropdown>
+                    </td>
                     <td>Talep Tarihi</td>
                     <td>Talep Durumu
-                        <select name="" id="slct_orderStatus" @change="getOrdersList" v-model="searchData.OrderStatus"> 
-                            <option selected value="null">Hepsi</option>
-                            <option v-for="orderStatus in getOrderStatus" :value="orderStatus.OrderStatus" :key="orderStatus.OrderStatus">{{ orderStatus.StatusName }}
-                            </option>
-                        </select>
+                        <b-dropdown :variant="searchData.OrderStatus != null ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <template #button-content>
+                                <i class="fas fa-filter"></i>
+                            </template>
+                            <select name="" id="slct_orderStatus" @change="getOrdersList" v-model="searchData.OrderStatus"> 
+                                <option selected :value="null">Hepsi</option>
+                                <option v-for="orderStatus in getOrderStatus" :value="orderStatus.OrderStatus" :key="orderStatus.OrderStatus">{{ orderStatus.StatusName }}
+                                </option>
+                            </select>
+                        </b-dropdown>
                     </td>
                     <td>İşlem</td>
                     <td>Son İşlem Tarihi</td>
@@ -119,6 +158,10 @@
             return {
                 searchData: {
                     OrderType: null,
+                    UserName: '',
+                    Mail: '',
+                    Name: '',
+                    Room: '',
                     BeginDate: null,
                     EndDate: null,
                     OrderStatus: null,
@@ -225,5 +268,10 @@
 <style>
     .table > :not(caption) > * > * {
         border-width: 1px !important;
+    }
+
+    .collapsed > .when-open,
+    .not-collapsed > .when-closed {
+    display: none;
     }
 </style>
