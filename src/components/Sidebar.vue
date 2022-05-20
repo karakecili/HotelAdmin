@@ -20,18 +20,18 @@
                 menuItems: [
                     {
                         header: true,
-                        title: "Menü",
+                        title: "menü",
                     },
                     {
                         href: "/",
                         title: "Dashboard",
-                        icon: "m1 fas fa-chart-bar",
+                        icon: "m1 fas fa-th-large",
                         tableName: "Tbl_Order"
                     },
                     {
                         href: "/requests",
                         title: "Talep Yönetimi",
-                        icon: "m1 fa fa-calendar-alt",
+                        icon: "m1 fas fa-envelope",
                         tableName: "Tbl_Order"
                     },
                     {
@@ -43,7 +43,7 @@
                     {
                         href: "/property",
                         title: "Mülk Yönetimi",
-                        icon: "m1 fa fa-house-user",
+                        icon: "m1 fa fa-home",
                         tableName: "Tbl_User"
                     },
                     {
@@ -54,7 +54,7 @@
                             {
                                 href: "/modules/il",
                                 title: "İller",
-                                icon: "m2 fa fa-map-marked-alt",
+                                icon: "m2 fa fa-map-marked",
                                 module: "ListProvinces",
                                 tableName: "Tbl_Province"
                             },
@@ -110,9 +110,24 @@
                         icon: "m1 fa fa-sign-out-alt",
                         tableName: "logout"
                     },
+                    {
+                        header: true,
+                        hiddenOnCollapse: true,
+                        disabled: false,
+                        class: 'imgLogo',
+                        // icon: {
+                        //     element: 'div',
+                        //     class: 'imgLogo',
+                        //     // attributes: {}
+                        //     // text: ''
+                        // },
+                    }
                 ],
                 collapsed: false,
             };
+        },
+        mounted() {
+            this.menuItems[0].title = "merhaba " + localStorage.FullName
         },
         computed: {
             logoutClass() {
@@ -120,7 +135,7 @@
                     'd-none': !this.$store.getters.isAuthenticated
                 }
             },
-            menu () {
+            menu() {
                 if (this.$store.state.Roles.length != 0) {
                     let role = this.$store.getters.getRoleById(localStorage.RoleId).RoleName;
                     if (role != 'Superadmin') {
@@ -148,11 +163,6 @@
                             CurrentImagePath: i.imagePath ?? '',
                             CurrentModule: i.module
                         })
-                        
-                        // this.$store.dispatch("ListFields", i.tableName)
-                        //     .then(() => {
-                        //         this.$store.dispatch(i.module)
-                        //     })
                         
                         this.$store.dispatch(i.module)
                     }
@@ -198,13 +208,22 @@
         font-family: "FontAwesome";
     }
 
-    /* .m1:hover {
-        background-color: inherit !important;
-    } */
+    .v-sidebar-menu .vsm-item.active-item>.vsm-link {
+        
+        font-weight: 400 !important;
+    }
 
-    /* .vsm-icon {
-        background-color: inherit !important;
-    } */
+    .v-sidebar-menu .vsm-item.first-item.active-item>.vsm-link>.vsm-icon, .router-link-exact-active {
+        color: #D6B761 !important;
+    }
+
+    .vsm-item.first-item.open-item>.vsm-link {
+        background-color: #1e1e2180 !important;
+    }
+
+    .vsm-header {
+        margin: 10px 0;
+    }
     
     .m2 {    
         width: 18px !important;
@@ -213,11 +232,24 @@
     }
     
     .m1 {
-
         height: 30px;
-        width: 30px !important;
+        width: 20px !important;
         background-color: inherit !important;
     }
-    
+
+    .vsm-list {        
+        display: flex;
+        flex-direction: column;
+    }
+
+    .imgLogo {
+        background: #2a2a2e url("../../../images/logo/logoWhite.png") 50% 0 no-repeat !important;
+        width: 100% !important;
+        min-height: 50px !important;
+        background-size: contain !important;
+        position: relative;
+        margin-top: auto;
+    }
+
 
 </style>

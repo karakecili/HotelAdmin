@@ -1,6 +1,6 @@
 <template>
     <div class="pageContainer">
-        <b-table striped hover :items="getModuleData" :fields="getFieldsByTbl.filter(x => x.tableShow)">
+        <b-table class="table-light" hover :items="getModuleData" :fields="getFieldsByTbl.filter(x => x.tableShow)">
             <!-- Sıralama -->
             <template #cell(index)="data">
                 {{ data.index + 1 }}
@@ -164,7 +164,7 @@
 </template>
 
 <script>
-    import {mapGetters} from "vuex";
+    import { mapGetters } from "vuex";
     import axios from "axios"
 
     export default {
@@ -251,7 +251,8 @@
                     // formData.append("file", this.uploadFile);
                     formData.append("FormFile", this.uploadFile);
                     formData.append("FileName", this.uploadFile.name);
-                    axios.post("Module/Post", formData);
+
+                    axios.post("File/Post", formData);
                     // formData.append("selectedfiles", this.uploadFile);
                     // axios.post("Module/UploadFileAsync", formData);
                     // // axios.post("Module/UploadPhoto", this.uploadFile);

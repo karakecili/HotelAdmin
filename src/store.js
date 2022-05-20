@@ -9,6 +9,7 @@ const store = new Vuex.Store({
     state: {
         loginUserId: null,
         roleId: null,
+        FullName: "",
         SessionKey: "",
         Orders: [],
         OrderTypes: [
@@ -21,11 +22,12 @@ const store = new Vuex.Store({
             { OrderType: 7, OrderName: "Asistan" }, 
         ],
         OrderStatus: [
-            { OrderStatus: 1, StatusName: "Talep Oluşturuldu" }, 
-            { OrderStatus: 2, StatusName: "Bekliyor" }, 
-            { OrderStatus: 3, StatusName: "Teklif Sunuldu" }, 
-            { OrderStatus: 4, StatusName: "Teklif Kabul Edildi" }, 
-            { OrderStatus: 5, StatusName: "Teklif Red Edildi" }, 
+            { OrderStatus: 0, Color: "#000000", StatusName: "Tüm Talepler" }, 
+            { OrderStatus: 1, Color: "#D6B761", StatusName: "Talep Oluşturuldu" }, 
+            { OrderStatus: 2, Color: "#808080", StatusName: "Bekliyor" }, 
+            { OrderStatus: 3, Color: "#1259F8", StatusName: "Teklif Sunuldu" }, 
+            { OrderStatus: 4, Color: "#04D33C", StatusName: "Teklif Kabul Edildi" }, 
+            { OrderStatus: 5, Color: "#FF0000", StatusName: "Teklif Red Edildi" }, 
         ],
         PossessionStatus: [
             { PossessionStatus: 1, PossessionName: "Müşteri Sahip" }, 
@@ -42,6 +44,7 @@ const store = new Vuex.Store({
             { RentableStatus: 4, RentableName: " Kabul Edildi" }, 
             { RentableStatus: 5, RentableName: " Reddedildi" }, 
         ],
+        OrderStatistics: [],
         OrderInfo: [],
         OrderLog: [],
         AdminList: [],
@@ -85,14 +88,31 @@ const store = new Vuex.Store({
             state.roleId = data.RoleId
             state.SessionKey = data.Session
             state.loginUserId = data.UserId
+            state.FullName = data.FullName
         },
         clearSession(state){
             state.loginUserId = null
             state.roleId = null
             state.SessionKey = ""
+            state.FullName = ""
         },
         updateOrderList(state, item) {
             state.Orders.push(item);
+        },
+        updateOrderStatistics(state, data) {
+            let cntAll = 0
+            let Status = {}
+            data.forEach(item => {
+                Status = state.OrderStatus.find(e => e.OrderStatus == item.OrderStatus.substring(6))
+
+                state.OrderStatistics.push({ StatusId: Status.OrderStatus, OrderStatus: item.OrderStatus, Count: item.cnt, Color: Status.Color, StatusName: Status.StatusName });
+                cntAll += item.cnt
+            })
+            Status = state.OrderStatus.find(e => e.OrderStatus == 0)
+
+            state.OrderStatistics.push({ StatusId: 0, OrderStatus: "StatusAll", Count: cntAll, Color: Status.Color, StatusName: Status.StatusName });
+
+            console.log(state.OrderStatistics)
         },
         updateOrderInfo(state, item) {
             state.OrderInfo.push(item);
@@ -151,8 +171,10 @@ const store = new Vuex.Store({
             let datasets = [{ backgroundColor: [], data: [] }]
 
             data.forEach(item => {
-                labels.push(state.OrderStatus.find(e => e.OrderStatus == item.OrderStatus).StatusName)
-                datasets[0].backgroundColor.push('#'+ Math.floor(Math.random()*16777215).toString(16))
+                let Status = state.OrderStatus.find(e => e.OrderStatus == item.OrderStatus)
+                labels.push(Status.StatusName)
+                // datasets[0].backgroundColor.push('#'+ Math.floor(Math.random()*16777215).toString(16))
+                datasets[0].backgroundColor.push(Status.Color)
                 datasets[0].data.push(item.cnt)
             }) 
 
@@ -163,8 +185,9 @@ const store = new Vuex.Store({
             let datasets = [{ backgroundColor: [], data: [] }]
             
             data.forEach(item => {
-                labels.push(state.OrderStatus.find(e => e.OrderStatus == item.OrderStatus).StatusName)
-                datasets[0].backgroundColor.push('#'+ Math.floor(Math.random()*16777215).toString(16))
+                let Status = state.OrderStatus.find(e => e.OrderStatus == item.OrderStatus)
+                labels.push(Status.StatusName)
+                datasets[0].backgroundColor.push(Status.Color)
                 datasets[0].data.push(item.cnt)
             }) 
 
@@ -188,7 +211,8 @@ const store = new Vuex.Store({
                         commit("setSession", { 
                             RoleId: localStorage.getItem("RoleId"), 
                             Session: localStorage.getItem("Session"), 
-                            UserId: localStorage.getItem("UserId")}
+                            UserId: localStorage.getItem("UserId"),
+                            FullName: localStorage.getItem("FullName")}
                         )
 
                         dispatch("getRolesList")
@@ -206,42 +230,13 @@ const store = new Vuex.Store({
                         localStorage.removeItem("RoleId")
                         localStorage.removeItem("Session")
                         localStorage.removeItem("UserId")
+                        localStorage.removeItem("FullName")
                         return false
                     }
                 }
             } catch (error) {
                 dispatch("SetError", error)
             }
-            //     return axios.get("Session/AdminSessionControl?" + "SessionKey=" + SessionKey)
-            //         .then(response => {
-            //             if(response.data) {
-            //                 commit("setSession", { 
-            //                     RoleId: localStorage.getItem("RoleId"), 
-            //                     Session: localStorage.getItem("Session"), 
-            //                     UserId: localStorage.getItem("UserId")})
-
-            //                 dispatch("getRolesList")
-            //                 dispatch("getAdminsList")
-            //                 dispatch("ListProvinces")
-            //                 dispatch("ListDistrict")
-            //                 dispatch("ListMansions")
-            //                 dispatch("ListFields")
-
-            //                 router.push("/")
-
-            //                 return true
-            //             } else {
-            //                 router.push("/auth")
-            //                 localStorage.removeItem("RoleId")
-            //                 localStorage.removeItem("Session")
-            //                 localStorage.removeItem("UserId")
-            //                 return false
-            //             }
-            //         }
-            //     ).catch(error => {
-            //         dispatch("SetError", error)
-            //     })
-            // }
         },
         async login({ commit, dispatch }, authData){
             try {
@@ -250,6 +245,7 @@ const store = new Vuex.Store({
                 localStorage.setItem("RoleId", data.RoleId)
                 localStorage.setItem("Session", data.Session)
                 localStorage.setItem("UserId", data.UserId)
+                localStorage.setItem("FullName", data.FullName)
                 commit("setSession", data)
                 dispatch("initAuth")
             } catch (error) {
@@ -263,6 +259,7 @@ const store = new Vuex.Store({
                 localStorage.removeItem("RoleId")
                 localStorage.removeItem("Session")
                 localStorage.removeItem("UserId")
+                localStorage.removeItem("FullName")
                 router.replace("/auth")
                 return response.data
             } catch (error) {
@@ -301,6 +298,23 @@ const store = new Vuex.Store({
                     dispatch("sessionControl")
                 }
                 return response.data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async getOrderStatistics({ commit, state, dispatch } ){
+            //Talep Güncelle
+            try {
+                const response = await axios.get("Request/OrderStatistics?SessionKey=" + state.SessionKey)
+
+                state.OrderStatistics = []
+                let data = response.data
+                
+                if (data.length > 0) {
+                    commit("updateOrderStatistics", data);
+                } else {
+                    dispatch("sessionControl")
+                }
             } catch (error) {
                 dispatch("SetError", error)
             }
@@ -768,6 +782,12 @@ const store = new Vuex.Store({
         isAuthenticated(state){
             return state.SessionKey !== ""
         },
+        getUserInfo(state) {
+            return { UserId: state.loginUserId,
+                FullName: state.FullName,
+                SessionKey : state.SessionKey 
+            }
+        },
         getOrders(state){
             return state.Orders;
         },
@@ -775,12 +795,16 @@ const store = new Vuex.Store({
             return state.OrderTypes;
         },
         getOrderStatus(state){
-            return state.OrderStatus;
+            return state.OrderStatus.filter(x => x.OrderStatus > 0);
         },
         getOrderStatusById: state => OrderStatus => {
             return state.OrderStatus.find(element => 
                 element.OrderStatus === OrderStatus
             )
+        },
+        getOrderStatistic(state){
+            return state.OrderStatistics.sort(function (a, b) {
+                return a.StatusId - b.StatusId});
         },
         getOrderInfo(state){
             return state.OrderInfo;

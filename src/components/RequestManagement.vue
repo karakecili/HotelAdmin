@@ -1,12 +1,23 @@
 <template>
-    <div class="pageContainer">
+    <div class="pageContainer pageContainer-Request">
+        <div class="requestHeader">
+            <div class="requestHeader-col" v-for="Static in getOrderStatistic" :key="Static.StatusId">
+                <div>
+                    <img class="requestHeader-col-img" :src="require(`../../../images/orders/${Static.OrderStatus}.png`)" :alt="Static.StatusName">
+                </div>
+                <div class="requestHeader-col-text">
+                    <span class="requestHeader-col-text-result" :style="`color:${Static.Color}`">{{Static.Count}}</span>
+                    <span class="requestHeader-col-text-status">{{Static.StatusName}}</span>
+                </div>
+            </div>
+        </div>
         <div :style="'overflow-y: auto; border-bottom: .5px solid rgba(0,0,0,.125); ' + 
-            'max-height: calc(100vh - ' + (selectedOrder.OrderId != null && rows > perPage ? '290' : selectedOrder.OrderId != null ? '250' : rows > perPage ? '40' : '0') + 'px);'">
-            <table class="table table-hover table-striped table-bordered requestTable">
+            'max-height: calc(100vh - ' + (selectedOrder.OrderId != null && rows > perPage ? '390' : selectedOrder.OrderId != null ? '370' : rows > perPage && currentPage == 1 ? '170' : '110') + 'px);'">
+            <table class="table table-light table-hover requestTable">
                 <thead>
-                    <td>TalepId</td>
+                    <td>Talep Id</td>
                     <td>Talep Türü
-                        <b-dropdown :variant="searchData.OrderType != null ? 'primary' : 'outline-primary'" text="Dropdown">
+                        <b-dropdown :variant="searchData.OrderType != null ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                             <template #button-content>
                                 <i class="fas fa-filter"></i>
                             </template>
@@ -18,7 +29,7 @@
                         </b-dropdown>
                     </td>
                     <td>Kullanıcı
-                        <b-dropdown :variant="searchData.UserName.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                        <b-dropdown :variant="searchData.UserName.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                             <template #button-content>
                                 <i class="fas fa-filter"></i>
                             </template>
@@ -26,7 +37,7 @@
                         </b-dropdown>
                     </td>
                     <td>Ad-Soyad
-                        <b-dropdown :variant="searchData.Name.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                        <b-dropdown :variant="searchData.Name.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                             <template #button-content>
                                 <i class="fas fa-filter"></i>
                             </template>
@@ -34,7 +45,7 @@
                         </b-dropdown>
                     </td>
                     <td>Mail
-                        <b-dropdown :variant="searchData.Mail.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                        <b-dropdown :variant="searchData.Mail.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                             <template #button-content>
                                 <i class="fas fa-filter"></i>
                             </template>
@@ -43,17 +54,16 @@
                         
                     </td>
                     <td>Telefon</td>
-                    <td>Oda
-                        <b-dropdown :variant="searchData.Room.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                    <td>Lokasyon
+                        <b-dropdown :variant="searchData.Room.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                             <template #button-content>
                                 <i class="fas fa-filter"></i>
                             </template>
                             <input type="text" v-model="searchData.Room" @input="getOrdersList">
                         </b-dropdown>
                     </td>
-                    <td>Talep Tarihi</td>
                     <td>Talep Durumu
-                        <b-dropdown :variant="searchData.OrderStatus != null ? 'primary' : 'outline-primary'" text="Dropdown">
+                        <b-dropdown :variant="searchData.OrderStatus != null ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                             <template #button-content>
                                 <i class="fas fa-filter"></i>
                             </template>
@@ -65,6 +75,7 @@
                         </b-dropdown>
                     </td>
                     <td>İşlem</td>
+                    <td>Talep Tarihi</td>
                     <td>Son İşlem Tarihi</td>
                 </thead>
                 <tbody>
@@ -76,10 +87,9 @@
                         <td> {{ Order.Mail }} </td>
                         <td> {{ Order.PhoneNumber }} </td>
                         <td> {{ Order.Possession }} </td>
-                        <td> {{ Order.OrderDate | formatDate }} </td>
-                        <td> {{ getOrderStatusById(Order.OrderStatus).StatusName }} </td>
+                        <td :style="'font-weight: bold; color: ' + getOrderStatusById(Order.OrderStatus).Color"> {{ getOrderStatusById(Order.OrderStatus).StatusName }} </td>
                         <td>
-                            <div class="input-group mb-3">
+                            <div class="input-group">
                                 <div class="input-group-prepend dropleft fullWidth" ref="dropleft">
                                     <button class="btn btn-outline-secondary dropdown-toggle fullWidth" type="button" data-toggle="dropdown" aria-haspopup="true" 
                                     aria-expanded="false" @click="selectOrder(Order)"> İşlem</button>
@@ -107,6 +117,7 @@
                                 </div>
                             </div>
                         </td>
+                        <td> {{ Order.OrderDate | formatDate }} </td>
                         <td> {{ Order.DB_Datetime | formatDate }} </td>
                     </tr>
                     <tr v-if="getOrders.length == 0">
@@ -123,12 +134,12 @@
             <b-card no-body>
                 <b-tabs card justified>
                     <b-tab title="Bilgiler" active>
-                        <b-table striped hover :items="getOrderInfo" thead-tr-class="d-none" table-class="requestTable">
+                        <b-table light hover :items="getOrderInfo" thead-tr-class="d-none" table-class="requestTable">
                             
                         </b-table>
                     </b-tab>
                     <b-tab title="Loglar">
-                        <b-table striped hover :items="getOrderLog" :fields="fields" table-class="requestTable">
+                        <b-table light hover :items="getOrderLog" :fields="fields" table-class="requestTable">
                             
                         </b-table>
                     </b-tab>
@@ -150,7 +161,7 @@
 </template>
 
 <script>
-    import {mapGetters} from "vuex";
+    import { mapGetters } from "vuex";
     import {required, minValue} from "vuelidate/lib/validators"
 
     export default {
@@ -205,17 +216,14 @@
             }
         },
         computed: {
-            ...mapGetters(["getOrderTypes"]),
-            ...mapGetters(["getOrderStatus"]),
-            ...mapGetters(["getOrders"]),
-            ...mapGetters(["getOrderInfo"]),
-            ...mapGetters(["getOrderLog"]),
+            ...mapGetters(["getOrderTypes", "getOrderStatus", "getOrders", "getOrderInfo", "getOrderLog", "getOrderStatistic"]),
             PagingText() {
                 return '<b>' +  this.rows + '</b> kayıt arasında ' + ((this.currentPage - 1) * this.perPage + 1) + ' - ' + Math.min((this.currentPage * this.perPage), this.rows) + ' arası kayıtlar'
             },
         },
         created() {
             this.getOrdersList()
+            this.getOrderStatistics()
         },
         methods: {
             getOrdersList() {
@@ -235,6 +243,9 @@
                         this.currentPage = 1
                         }
                     })
+            },
+            getOrderStatistics() {
+                this.$store.dispatch("getOrderStatistics")
             },
             getOrderStatusById(id) {
                 return this.$store.getters.getOrderStatusById(id);
@@ -265,13 +276,13 @@
     }
 </script>
 
-<style>
+<style scoped>
     .table > :not(caption) > * > * {
         border-width: 1px !important;
     }
 
     .collapsed > .when-open,
     .not-collapsed > .when-closed {
-    display: none;
+        display: none;
     }
 </style>

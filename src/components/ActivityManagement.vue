@@ -1,6 +1,6 @@
 <template>
     <div class="pageContainer">
-        <b-table striped hover :items="getActivityType" :fields="ActivityFields">
+        <b-table class="table-light" hover :items="getActivityType" :fields="ActivityFields">
             <template #cell(index)="data">
                 {{ data.index + 1 }}
             </template>
@@ -37,7 +37,7 @@
 </template>
 
 <script>
-    import {mapGetters} from "vuex";
+    import { mapGetters } from "vuex";
 
     export default {
         data () {

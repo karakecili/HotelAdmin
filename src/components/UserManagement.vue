@@ -1,12 +1,12 @@
 <template>
     <div class="pageContainer">
         <div v-if="!isEdit">
-            <div :style="'max-height: calc(100vh - ' + (rows > perPage ? '40' : '0') + 'px);overflow-y: auto;'">
+            <div :style="'max-height: calc(100vh - ' + (rows > perPage ? '40' : '0') + 'px);overflow-y: auto; min-height: calc(100vh - 50px);'">
                     
-                <table class="table table-hover table-striped table-bordered">
+                <table class="table table-hover table-light table-bordered">
                     <thead>
                         <td>Kullanıcı
-                            <b-dropdown :variant="searchData.UserName.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <b-dropdown :variant="searchData.UserName.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                                 <template #button-content>
                                     <i class="fas fa-filter"></i>
                                 </template>
@@ -14,7 +14,7 @@
                             </b-dropdown>
                         </td>
                         <td>Ad-Soyad
-                            <b-dropdown :variant="searchData.Name.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <b-dropdown :variant="searchData.Name.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                                 <template #button-content>
                                     <i class="fas fa-filter"></i>
                                 </template>
@@ -22,7 +22,7 @@
                             </b-dropdown>
                         </td>
                         <td>Mail
-                            <b-dropdown :variant="searchData.Mail.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <b-dropdown :variant="searchData.Mail.length > 0 ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                                 <template #button-content>
                                     <i class="fas fa-filter"></i>
                                 </template>
@@ -31,7 +31,7 @@
                         </td>
                         <td>Telefon</td>
                         <td>Rol
-                            <b-dropdown :variant="searchData.RoleId != null ? 'primary' : 'outline-primary'" text="Dropdown">
+                            <b-dropdown :variant="searchData.RoleId != null ? 'primary' : 'outline-primary'" text="Dropdown" class="filterDD">
                                 <template #button-content>
                                     <i class="fas fa-filter"></i>
                                 </template>
@@ -201,7 +201,7 @@
 </template>
 
 <script>
-    import {mapGetters} from "vuex";
+    import { mapGetters } from "vuex";
 
     export default {
         data() {

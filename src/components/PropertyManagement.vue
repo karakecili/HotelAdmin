@@ -1,7 +1,7 @@
 <template>
     <div class="pageContainer">
         <div v-if="!mansionSelected">
-            <b-table striped hover :items="getMansions" :fields="fields" @row-clicked="selectRow" >
+            <b-table class="table-light" hover :items="getMansions" :fields="fields" @row-clicked="selectRow" >
 
             </b-table>
         </div>
@@ -254,7 +254,7 @@
 </template>
 
 <script>
-    import {mapGetters} from "vuex";
+    import { mapGetters } from "vuex";
     import {required, minValue } from "vuelidate/lib/validators"
 
     export default {

@@ -1,29 +1,34 @@
 <template>
     <div class="pageContainer">
-        <div class="chartPie" v-if="getRecentRequest.datasets[0].data.length > 0">
-            <span class="chartPie-span">Güncel Talepler</span>
-            <Pie
-                :chart-options="chartOptions"
-                :chart-data="getRecentRequest"
-            />
-        </div>
-        <div class="chartPie" v-if="getFormerRequest.datasets[0].data.length > 0">
-            <span class="chartPie-span">Eski Talepler</span>
-            <Pie
-                :chart-options="chartOptions"
-                :chart-data="getFormerRequest"
-            />
+        <div class="chartList">
+            <div class="chartPie" v-if="getRecentRequest.datasets[0].data.length > 0">
+                <span class="chartPie-span">Güncel Talepler</span>
+                <hr>
+                <Pie
+                    :chart-options="chartOptions"
+                    :chart-data="getRecentRequest"
+                />
+            </div>
+
+            <div class="chartPie" v-if="getFormerRequest.datasets[0].data.length > 0">
+                <span class="chartPie-span">Eski Talepler</span>
+                <hr>
+                <Pie
+                    :chart-options="chartOptions"
+                    :chart-data="getFormerRequest"
+                />
+            </div>
         </div>
 
         <div class="dashboardTable" v-if="getRecentUser.length > 0">
             <span class="dashboardTable-span">Güncel Kayıtlar</span>
-            <b-table striped hover :items="getRecentUser" :fields="UserFields">
+            <b-table class="table-light" hover :items="getRecentUser" :fields="UserFields">
                 
             </b-table>
         </div>
         <div class="dashboardTable" v-if="getFormerUser.length > 0">
             <span class="dashboardTable-span">Eski Kayıtlar</span>
-            <b-table striped hover :items="getFormerUser" :fields="UserFields">
+            <b-table class="table-light" hover :items="getFormerUser" :fields="UserFields">
                 
             </b-table>
         </div>
@@ -31,7 +36,7 @@
 </template>
 
 <script>
-    import {mapGetters} from "vuex";
+    import { mapGetters } from "vuex";
     import { Pie } from "vue-chartjs/legacy"
     import {
         Chart as ChartJS,
@@ -64,8 +69,7 @@
                     title: {
                         display: true,
                         text: 'Custom Chart Title'
-                    }
-
+                    },
                 },
                 interval: null,
             }
