@@ -89,7 +89,7 @@
                             },
                             {
                                 href: "/modules/hotel",
-                                title: "Hoteller",
+                                title: "Projeler",
                                 icon: "m2 fa fa-hotel",
                                 module: "ListMansion",
                                 tableName: "Tbl_Mansion",
@@ -245,7 +245,7 @@
     .imgLogo {
         background: #2a2a2e url("../../../images/logo/logoWhite.png") 50% 0 no-repeat !important;
         width: 100% !important;
-        min-height: 50px !important;
+        min-height: 35px !important;
         background-size: contain !important;
         position: relative;
         margin-top: auto;

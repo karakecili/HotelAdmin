@@ -3,6 +3,17 @@
         <div v-if="!mansionSelected">
             <b-table class="table-light" hover :items="getMansions" :fields="fields" @row-clicked="selectRow" >
 
+                <template #cell(IlId)="row">
+                    {{ !row.field.isPrimary && row.value != "" ? getProvinces.find(x => x.IlId == row.value).Il : row.value }}
+                </template>
+
+                <template #cell(IlceId)="row">
+                    {{ !row.field.isPrimary && row.value != "" ? getDistrict.find(x => x.IlceId == row.value).Ilce : row.value }}
+                </template>
+
+                <template #cell(ImageUrl)="row">
+                    <b-img :src="require(`../../../images/hotels/${row.value}`)" :alt="row.value" border=3 class="listImage" v-if="row.value!=''"></b-img>
+                </template>
             </b-table>
         </div>
         <div v-else-if="!possessionSelected" class="divPost">
@@ -264,13 +275,10 @@
                 possessionSelected: false,
                 possessionData: [],
                 fields: [ 
-                    { key: 'Name', label: 'Otel Adı', sortable: true, }, 
-                    { key: 'Description', label: 'Tanım', sortable: true, }, 
-                    { key: 'Title', label: 'Title', sortable: true, }, 
-                    { key: 'ImageUrl', label: 'Görsel', sortable: true, }, 
+                    { key: 'Name', label: 'Proje Adı', sortable: true, }, 
                     { key: 'IlId', label: 'İl', sortable: true, }, 
                     { key: 'IlceId', label: 'İlçe', sortable: true, }, 
-                    { key: 'Details', label: 'Detaylar', }, 
+                    { key: 'ImageUrl', label: 'Görsel', }, 
                 ],
                 PosFields: [ 
                     { key: 'UserName', label: 'Kullanıcı Adı', sortable: true, }, 
@@ -353,7 +361,8 @@
             }
         },
         computed: {
-            ...mapGetters(["getMansions", "getPossessionStatus", "getBlocks", "getPossessions", "getPossessionsByBlock", "getPossessionInfo", "getRentableInfo", "getRequestList", "getRentableStatus"]),
+            ...mapGetters(["getProvinces", "getDistrict", "getMansions", "getPossessionStatus", "getBlocks", "getPossessions", 
+                "getPossessionsByBlock", "getPossessionInfo", "getRentableInfo", "getRequestList", "getRentableStatus"]),
             MansionInfo() {
                 return this.selectedRow.Name + " (" + (this.selectedRow.IsBlocky ? this.$store.getters.getBlocks.length + " Blok " : "") + this.$store.getters.getPossessions.length + " Oda)"
             },

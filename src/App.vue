@@ -172,6 +172,12 @@
             flex-direction: column;
             gap: 20px;
         }
+        &-login {
+            width: 100%;
+            background-color: #EFEFEF;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
     }
     .requestHeader {
         display: flex;
@@ -249,7 +255,7 @@
         width: 100%;
     }
     .DDM {
-        padding: 0; 
+        padding: 0 !important; 
         border: 3px solid #460df4;
     }
     .chartList {
@@ -332,5 +338,34 @@
 
     .nav-link {
         color: #000 !important;
+    }
+    .dropdown-menu {
+        &.show {
+            padding: 10px;
+        }
+    }
+    .btn-outline-yellow {
+        
+        color: #D6B761 !important;
+        border-color: #D6B761 !important;
+
+        &:active, &:hover {
+            color: #fff !important;
+            background-color: #D6B761 !important;
+            border-color: #D6B761 !important;
+        }
+
+        &:focus {
+            outline-color: initial;
+            outline-style: initial;
+            outline-width: 0px;
+            box-shadow: 0 0 0 0.25rem #fff3cd
+        }
+    }
+    .dropleft {
+        &>button {
+            padding: 3px;
+            font-size: 14px;
+        }
     }
 </style>

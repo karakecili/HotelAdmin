@@ -95,7 +95,7 @@
                                     aria-expanded="false" @click="selectOrder(Order)"> İşlem</button>
                                     <div class="dropdown-menu DDM" @click="$event.stopPropagation()" ref="dropdown">
                                         <table class="table-edited">
-                                            <tr style="background-color: #0062cc;">
+                                            <tr style="background-color: #e2e4e6;">
                                                 <td><label>Durum:</label></td>
                                                 <td>
                                                     <select name="" v-model="selectedOrder.OrderStatus" class="fullWidth"> 
@@ -104,13 +104,12 @@
                                                     </select>
                                                 </td>
                                             </tr>
-                                            <tr style="background-color: #CEECF5;">
+                                            <tr style="background-color: #e2e4e6;">
                                                 <td><label>Not:</label></td>
                                                 <td><input v-model="selectedOrder.Note" type="text" name="" id=""></td>
                                             </tr>
-                                            <tr style="background-color: #0062cc;">
-                                                <td></td>
-                                                <td><button class="btn-primary" @click="setOrder()">Uygula</button></td>
+                                            <tr style="background-color: #e2e4e6;">
+                                                <td colspan="2" style="text-align: right;"><button class="btn-secondary" @click="setOrder()">Uygula</button></td>
                                             </tr>
                                         </table>
                                     </div>
