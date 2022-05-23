@@ -66,7 +66,7 @@ const store = new Vuex.Store({
         ],
         Provinces: [],
         District: [],
-        Vehicles: [ "Araç", "Tekne" ],
+        Vehicles: [ "Otomobil", "Tekne" ],
         CurrentTable: "",
         CurrentPK: "",
         CurrentImagePath: "",
@@ -105,7 +105,7 @@ const store = new Vuex.Store({
             data.forEach(item => {
                 Status = state.OrderStatus.find(e => e.OrderStatus == item.OrderStatus.substring(6))
 
-                state.OrderStatistics.push({ StatusId: Status.OrderStatus, OrderStatus: item.OrderStatus, Count: item.cnt, Color: Status.Color, StatusName: Status.StatusName });
+                state.OrderStatistics.push({ StatusId: Status.OrderStatus, OrderStatus: "Status" + item.OrderStatus, Count: item.cnt, Color: Status.Color, StatusName: Status.StatusName });
                 cntAll += item.cnt
             })
             Status = state.OrderStatus.find(e => e.OrderStatus == 0)

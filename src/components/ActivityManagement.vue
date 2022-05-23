@@ -52,7 +52,6 @@
                             return item == 1 ? "Aktif" : "Pasif"
                         } 
                     }, 
-                    { key: 'LangCode', label: 'Dil Kodu', }, 
                     { key: 'Details', label: 'Detaylar', }, 
                 ],
             }

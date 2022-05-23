@@ -1,5 +1,5 @@
 <template>
-    <div class="pageContainer">
+    <div class="pageContainer-login">
         <div class="row  mt-5">
             <div class="col-md-4 offset-4 card card-primary p-3 border"
                  :class="{'border-primary' : isUser, 'border-success' : !isUser }">
