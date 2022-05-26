@@ -60,7 +60,7 @@
                     { key: 'FirstName', label: 'Ad', sortable: true, }, 
                     { key: 'LastName', label: 'Soyad', sortable: true, }, 
                     { key: 'Project', label: 'Proje', sortable: true, }, 
-                    { key: 'Room', label: 'Oda/Bağımsız Bölüm', sortable: true, }, 
+                    { key: 'Room', label: 'Daire/Bağımsız Bölüm', sortable: true, }, 
                     { key: 'Date', label: 'Tarih', sortable: true, }, 
                 ],
                 chartOptions: {

@@ -33,7 +33,8 @@
                             <button 
                                 v-for="Possession in getPossessionsByBlock(Block.BlockId)" 
                                 :key="Possession.PossessionId" 
-                                class="PosButton"   
+                                class="PosButton"
+                                :style="'background-color:' + getPossessionStatusById(Possession.PossessionType).Color"
                                 @click="selectPossession(Possession.PossessionId, Possession.MansionId)"
                             > {{ Possession.No }} </button>
                         </div>
@@ -45,6 +46,7 @@
                     v-for="Possession in getPossessions" 
                     :key="Possession.PossessionId" 
                     class="PosButton"
+                    :style="'background-color:' + getPossessionStatusById(Possession.PossessionType).Color"
                     @click="selectPossession(Possession.PossessionId, Possession.MansionId)"
                 > {{ Possession.No }} </button>
             </div>
@@ -54,17 +56,17 @@
                 <b-button class="btn btn-danger" @click="possessionSelected=!possessionSelected">Geri</b-button>
                 <span class="spnMansionInfo">
                     <div v-if="IsPossession">
-                        {{ getPossessionInfo.Mansion + " " + (getPossessionInfo.Block == "" ? "" : "Blok: " + getPossessionInfo.Block + " ") + RoomType + ": " + getPossessionInfo.No }} 
+                        {{ getPossessionInfo.Mansion + " " + (getPossessionInfo.Block == "" ? "" : "Blok: " + getPossessionInfo.Block + " ") + RoomType + ": " + getPossessionInfo.No }}
                     </div>
                     <div v-else>
-                        {{ MansionInfo }} 
+                        {{ MansionInfo }}
                     </div>
                 </span>
             </div>
             <div class="PosStatus" v-if="IsPossession">
                 <div class="PosInfo">
-                    <span>{{ "Mülk Sahibi: " + getPossessionInfo.OwnerInfo.UserName + " (" + getPossessionInfo.OwnerInfo.FirstName + " " + getPossessionInfo.OwnerInfo.LastName + ")" }}</span>
-                    <span>{{ "Mülk Statüsü: " + getPossessionInfo.PossessionTypeDesc }}</span>
+                    <span><b>Mülk Sahibi: </b>  {{  getPossessionInfo.OwnerInfo.UserName + " (" + getPossessionInfo.OwnerInfo.FirstName + " " + getPossessionInfo.OwnerInfo.LastName + ")" }}</span>
+                    <span><b>Mülk Statüsü: </b>  {{ getPossessionInfo.PossessionTypeDesc }}</span>
                     <div style="display: none">
                         <b-form-select id="input-5" v-model="getPossessionInfo.PossessionType">
                             <option v-for="Possession in getPossessionStatus" :value="Possession.PossessionStatus" :key="Possession.PossessionStatus">
@@ -74,7 +76,7 @@
                     </div>
                 </div>
                 <div class="PostRent" v-if="getPossessionInfo.RentableRequest">
-                    <span> Kiralama Durumu: </span>
+                    <span><b>Kiralama Durumu: </b>  </span>
                     <b-form-select
                         id="input-51"
                         v-model="getPossessionInfo.RentableRequest.Status"
@@ -87,15 +89,15 @@
                     </b-form-select>
                 </div>
                 <div class="PosInfo" v-if="getPossessionInfo.RentableRequest && getRentableInfo.TimeList.length > 0">
-                    <span> Müsait Olmayan Günler: </span>
+                    <span><b>Müsait Olmayan Günler: </b> </span>
                     <span v-for="time in getRentableInfo.TimeList" :key="time.id">{{ time.BeginDate | formatDate }} - {{ time.EndDate | formatDate }}</span>
                 </div>
                 <div class="PosBooked" v-if="getPossessionInfo.BookingInfo">
-                    {{ "Kiracı Bilgisi: " + getPossessionInfo.BookedInfo.UserName + " (" + getPossessionInfo.BookedInfo.FirstName + " " + getPossessionInfo.BookedInfo.LastName + ")" }}
-                    {{ "Kira Süresi:    " + (getPossessionInfo.BookingInfo.BeginDate | formatDate) + " - " + (getPossessionInfo.BookingInfo.EndDate | formatDate) }}
+                    <b>Kiracı Bilgisi: </b> {{ getPossessionInfo.BookedInfo.UserName + " (" + getPossessionInfo.BookedInfo.FirstName + " " + getPossessionInfo.BookedInfo.LastName + ")" }}
+                    <b>Kira Süresi:    </b> {{ (getPossessionInfo.BookingInfo.BeginDate | formatDate) + " - " + (getPossessionInfo.BookingInfo.EndDate | formatDate) }}
                 </div>
             </div>
-            <div class="PosRequests">
+            <div class="PosRequests" v-if="getRequestList.length > 0">
                 <b>Gelen Talepler</b>
                 <b-table striped hover :items="getRequestList" :fields="PosFields" @row-clicked="selectRow" >
                     <template #cell(Phone)="row">
@@ -131,7 +133,7 @@
             </div>
         </div>
 
-        <b-modal id="modalRoom" :title="'Yeni' + RoomType" hide-footer body-class="modalBody">
+        <b-modal id="modalRoom" :title="'Yeni ' + RoomType" hide-footer body-class="modalBody">
             <b-container class="modalRoom">
                 <b-form-group label="No:" label-for="input1" label-cols="4" label-cols-lg="2">
                     <b-form-input 
@@ -361,13 +363,13 @@
             }
         },
         computed: {
-            ...mapGetters(["getProvinces", "getDistrict", "getMansions", "getPossessionStatus", "getBlocks", "getPossessions", 
+            ...mapGetters(["getProvinces", "getDistrict", "getMansions", "getPossessionStatus", "getPossessionStatusById", "getBlocks", "getPossessions", 
                 "getPossessionsByBlock", "getPossessionInfo", "getRentableInfo", "getRequestList", "getRentableStatus"]),
             MansionInfo() {
-                return this.selectedRow.Name + " (" + (this.selectedRow.IsBlocky ? this.$store.getters.getBlocks.length + " Blok " : "") + this.$store.getters.getPossessions.length + " Oda)"
+                return this.selectedRow.Name + " (" + (this.selectedRow.IsBlocky ? this.$store.getters.getBlocks.length + " Blok " : "") + this.$store.getters.getPossessions.length + " Daire)"
             },
             RoomType() {
-                return this.selectedRow.RoomType == 1 ? "Oda" : this.selectedRow.RoomType == 2 ? "Bağımsız Bölüm" : ""
+                return this.selectedRow.RoomType == 1 ? "Daire" : this.selectedRow.RoomType == 2 ? "Bağımsız Bölüm" : ""
             }
         },
         methods: {
@@ -423,7 +425,7 @@
             },
             ListPossessions() {
                 this.ResetPossession()
-                this.$store.dispatch("ListPossessions", this.Possession.MansionId)
+                this.$store.dispatch("ListPossessions", { MansionId: this.Possession.MansionId })
             },
             ListBlocks() {
                 this.ResetBlock()

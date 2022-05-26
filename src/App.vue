@@ -60,10 +60,15 @@
         align-items: center;
         text-align: center;
         justify-content: space-around;
+        gap: 10px;
+
+        & > button {
+            font-size: 14px;
+        }
     }
     .divPosBody {
         display: flex;
-        background-color: #514e4e;
+        background-color: #fff;
         height: 100%;
         height: calc(100vh - 60px);
         overflow-y: auto;
@@ -77,13 +82,17 @@
         display: flex;
         flex-direction: column;
         gap: 5px;
-    }
-    .PosInner span {
-        font-weight: bold;
-        font-size: 26px;
-        background-color: lightyellow;
-        text-align: center;
-        padding: 5px 0;
+        margin-top: 20px;
+
+        & > span {
+            
+            font-weight: bold;
+            font-size: 20px;
+            text-align: left;
+            padding: 5px;
+            border: black 1px solid;
+            width: fit-content;
+        }
     }
     .PosButtonList {
         display: flex;
@@ -91,13 +100,13 @@
         flex-wrap: wrap;
     }
     .PosButton {
-        padding: 10px 25px;
-        font-size: 20px;
+        font-size: 14px;
         margin: 5px;
-        border-radius: 25px;
-        border: 2px solid rgb(206 212 218 / 50%);
-        font-weight: bold;
+        border-radius: 3px;
+        border: 2px solid rgba(206,212,218,.5);
+        font-weight: 700;
         height: max-content;
+        width: 70px;
     }
     .modalRoom {
         display: flex;
@@ -121,10 +130,30 @@
     }
     .spnMansionInfo {
         font-weight: bold;
-        font-size: 26px;
+        font-size: 22px;
+        margin: auto;
     }
-    .form-group {
-        margin: 0;
+    .userForm {
+        display: grid;
+        grid-template-columns: repeat(2, 50% [col-start]);
+        row-gap: 10px;
+
+        &-group {
+            margin-left: 2%;
+            width: 90%;
+            display: inline-block;
+            font-size: 14px;
+
+            & > * {
+                font-size: 14px !important;
+                & > * {
+                    font-size: 14px !important;
+                }
+            }
+        }
+        &-main {
+            padding: 30px;
+        }
     }
     .modalBody {
         padding: 0 !important;
@@ -146,6 +175,7 @@
         gap: 10px;
         margin: 0;
         padding: 10px;
+        font-size: 14px;
     }
     .PosInfo {
         display: flex;
@@ -156,6 +186,11 @@
         &-Select {
             width: 200px;
         }
+    }
+    .PosRequests {
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 14px;
     }
     .listImage {
         width: 250px;
@@ -227,7 +262,16 @@
         }
     }
     .buttonGroup {
-        margin: 30px 0;
+        margin: 0;
+        margin-left: 1%;
+        padding: 30px 0;
+
+        & > * {
+            font-size: 14px !important;
+            & > * {
+                font-size: 14px !important;
+            }
+        }
     }
     .authLogo {
         width: 200px; 

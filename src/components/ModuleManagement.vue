@@ -91,8 +91,8 @@
                             <option value="4">Firma Sahip Kiralık</option>
                         </template>
                         <template v-else-if="col.key == 'RoomType'"> 
-                            <option value="-1" disabled>Lütfen Oda Türü Seçiniz</option>
-                            <option value="1">Oda</option>
+                            <option value="-1" disabled>Lütfen Daire Türü Seçiniz</option>
+                            <option value="1">Daire</option>
                             <option value="2">Bağımsız Bölüm</option>
                         </template>
                        

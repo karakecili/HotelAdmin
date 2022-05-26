@@ -30,12 +30,12 @@ const store = new Vuex.Store({
             { OrderStatus: 5, Color: "#FF0000", StatusName: "Teklif Red Edildi" }, 
         ],
         PossessionStatus: [
-            { PossessionStatus: 1, PossessionName: "Müşteri Sahip" }, 
-            { PossessionStatus: 2, PossessionName: "Müşteri Sahip Kiralık" }, 
-            { PossessionStatus: 3, PossessionName: "Firma Sahip Satılık" }, 
-            { PossessionStatus: 4, PossessionName: "Firma Sahip Kiralık" }, 
-            { PossessionStatus: 5, PossessionName: "Firma Sahip Ziyaretlik" }, 
-            { PossessionStatus: 6, PossessionName: "Kullanım Dışı" }, 
+            { PossessionStatus: 1, Color: "#fad7e9", PossessionName: "Müşteri Sahip" }, 
+            { PossessionStatus: 2, Color: "#fad7d7", PossessionName: "Müşteri Sahip Kiralık" }, 
+            { PossessionStatus: 3, Color: "#d7dcfa", PossessionName: "Firma Sahip Satılık" }, 
+            { PossessionStatus: 4, Color: "#d7f2fa", PossessionName: "Firma Sahip Kiralık" }, 
+            { PossessionStatus: 5, Color: "#d7fade", PossessionName: "Firma Sahip Ziyaretlik" }, 
+            { PossessionStatus: 6, Color: "#faf4d7", PossessionName: "Kullanım Dışı" }, 
         ],
         RentableStatus: [
             { RentableStatus: 1, RentableName: " Yeni İstek" }, 
@@ -50,6 +50,7 @@ const store = new Vuex.Store({
         AdminList: [],
         Users: [],
         Roles: [],
+        PrimaryUsers: [],
         ModuleData: [],
         Fields: [],
         Mansions: [],
@@ -128,6 +129,9 @@ const store = new Vuex.Store({
         },
         updateRoleList(state, item) {
             state.Roles.push(item);
+        },
+        updatePrimaryList(state, item) {
+            state.PrimaryUsers.push(item);
         },
         updateModuleData(state, item) {
             item.ID = item[state.CurrentPK]
@@ -217,6 +221,7 @@ const store = new Vuex.Store({
 
                         dispatch("getRolesList")
                         dispatch("getAdminsList")
+                        dispatch("ListPrimary")
                         dispatch("ListProvinces")
                         dispatch("ListDistrict")
                         dispatch("ListMansions")
@@ -407,7 +412,6 @@ const store = new Vuex.Store({
             }
         },
         async getRolesList({ commit, dispatch, state }){
-            //Hava Alanı Verilerini yükle
             try {
                 const response = await axios.get("User/ListRole")
                 state.Roles = []
@@ -420,12 +424,36 @@ const store = new Vuex.Store({
                 dispatch("SetError", error)
             }
         },
+        async ListPrimary({ commit, dispatch, state }){
+            try {
+                const response = await axios.get("User/ListPrimary?SessionKey=" + state.SessionKey)
+                state.PrimaryUsers = []
+                let data = response.data
+                for (let key in data) {
+                    commit("updatePrimaryList", data[key])
+                }
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
         async UpdateUser({ dispatch, state }, updateData ){
             try {
                 const response = await axios.post("User/UpdateUser?" + "UserId=" + updateData.UserId + "&UserName=" + updateData.UserName + "&Password=" + updateData.Password +
                     "&Mail=" + updateData.Mail + "&FirstName=" + updateData.FirstName + "&LastName=" + updateData.LastName + "&Language=" + updateData.Language +
                     "&DateOfBirth=" + updateData.DateOfBirth + "&Address=" + updateData.Address + "&PhoneNumber=" + updateData.PhoneNumber +
-                    "&RoleId=" + updateData.RoleId + "&DB_User=" + state.loginUserId + "&SessionKey=" + state.SessionKey)
+                    "&RoleId=" + updateData.RoleId + "&SessionKey=" + state.SessionKey)
+                return response.data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async AddUser({ dispatch, state }, registerData ){
+            try {
+                const response = await axios.post("User/AddUser?" +  "&UserName=" + registerData.UserName + "&Password=" + registerData.Password +
+                    "&Mail=" + registerData.Mail + "&FirstName=" + registerData.FirstName + "&LastName=" + registerData.LastName + "&Language=" + registerData.Language +
+                    "&DateOfBirth=" + registerData.DateOfBirth + "&Address=" + registerData.Address + "&PhoneNumber=" + registerData.PhoneNumber +
+                    "&RoleId=" + registerData.RoleId + "&PrimaryUser=" + registerData.PrimaryUser + "&PossessionId=" + registerData.PossessionId +
+                    "&BeginDate=" + registerData.BeginDate + "&EndDate=" + registerData.EndDate + "&SessionKey=" + state.SessionKey)
                 return response.data
             } catch (error) {
                 dispatch("SetError", error)
@@ -445,74 +473,90 @@ const store = new Vuex.Store({
         },
 
         //Modüller
-        async ListFields({ commit, state }){
-            const response = await axios.get("Module/ListFields")
-            state.Fields = []
-            let data = response.data
-            for (let row in data) {
-                data[row].key = data[row].keyValue
-                commit("updateFields", data[row])
+        async ListFields({ commit, state, dispatch }){
+            try {
+                const response = await axios.get("Module/ListFields")
+                state.Fields = []
+                let data = response.data
+                for (let row in data) {
+                    data[row].key = data[row].keyValue
+                    commit("updateFields", data[row])
+                }
+            } catch (error) {
+                dispatch("SetError", error)
             }
         },
         async ListFieldsByTbl({ commit, state, dispatch }, tableName){
-            const response = await axios.get("Module/ListFields?" + "tableName=" + tableName)
-            state.Fields = []
-            let data = response.data
-            for (let row in data) {
-                data[row].key = data[row].keyValue
-                commit("updateFields", data[row])
+            try {
+                const response = await axios.get("Module/ListFields?" + "tableName=" + tableName)
+                state.Fields = []
+                let data = response.data
+                for (let row in data) {
+                    data[row].key = data[row].keyValue
+                    commit("updateFields", data[row])
+                }
+                dispatch(state.CurrentModule)
+            } catch (error) {
+                dispatch("SetError", error)
             }
-            dispatch(state.CurrentModule)
         },
-        ListProvinces({ commit, state }){
-            axios.get("Module/ListProvince")
-                .then(response => {
-                    state.ModuleData = []
-                    let data = response.data;
-                    if (state.Provinces.length == 0) {
-                        state.Provinces = data
-                    } 
-                    else {
-                        for (let key in data) {
-                            commit("updateModuleData", data[key]);
-                        }
-                    }
-            })
-        },
-        ListDistrict({ commit, state }){
-            axios.get("Module/ListDistrict")
-                .then(response => {
-                    state.ModuleData = []
-                    let data = response.data;
-                    if (state.District.length == 0) {
-                        state.District = data
-                    } 
-                    else {
-                        for (let key in data) {
-                            commit("updateModuleData", data[key]);
-                        }
-                    }
-            })
-        },
-        ListAirport({ commit, state }){
-            axios.get("Module/ListAirport")
-                .then(response => {
-                    state.ModuleData = []
-                    let data = response.data;
+        async ListProvinces({ commit, state, dispatch }){
+            try {
+                const response = await axios.get("Module/ListProvince")
+                state.ModuleData = []
+                let data = response.data
+                if (state.Provinces.length == 0) {
+                    state.Provinces = data
+                }
+                else {
                     for (let key in data) {
-                        commit("updateModuleData", data[key]);
+                        commit("updateModuleData", data[key])
                     }
-            })
+                }
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
-        ListVehicle({ commit, state }){
-            axios.get("Module/ListVehicle")
-                .then(response => {
-                    state.ModuleData = []
-                    let data = response.data;
+        async ListDistrict({ commit, state, dispatch }){
+            try {
+                const response = await axios.get("Module/ListDistrict")
+                state.ModuleData = []
+                let data = response.data
+                if (state.District.length == 0) {
+                    state.District = data
+                }
+                else {
                     for (let key in data) {
-                        commit("updateModuleData", data[key]);
+                        commit("updateModuleData", data[key])
                     }
-            })
+                }
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async ListAirport({ commit, state, dispatch }){
+            try {
+                const response = await axios.get("Module/ListAirport")
+                state.ModuleData = []
+                let data = response.data
+                for (let key in data) {
+                    commit("updateModuleData", data[key])
+                }
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async ListVehicle({ commit, state, dispatch }){
+            try {
+                const response = await axios.get("Module/ListVehicle")
+                state.ModuleData = []
+                let data = response.data
+                for (let key in data) {
+                    commit("updateModuleData", data[key])
+                }
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
         async ListRestaurants({ commit, dispatch, state }){
             try {
@@ -581,9 +625,22 @@ const store = new Vuex.Store({
                 dispatch("SetError", error)
             }
         },
-        async ListPossessions({ commit, state, dispatch }, MansionId){
+        async ListPossessions({ commit, state, dispatch }, Payload){
             try {
-                const response = await axios.get("Property/ListPossessions?MansionId=" + MansionId + "&SessionKey=" + state.SessionKey)
+                const response = await axios.get("Property/ListPossessions?MansionId=" + Payload.MansionId + "&BlockId=" + Payload.BlockId + "&SessionKey=" + state.SessionKey)
+                state.Possessions = []
+                let data = response.data
+                for (let key in data) {
+                    commit("updatePossessions", data[key])
+                }
+                return data
+            } catch (error) {
+                dispatch("SetError", error)
+            }
+        },
+        async ListPossessionsNS({ commit, state, dispatch }, Payload){
+            try {
+                const response = await axios.get("Property/ListPossessionsNS?MansionId=" + Payload.MansionId + "&BlockId=" + Payload.BlockId)
                 state.Possessions = []
                 let data = response.data
                 for (let key in data) {
@@ -696,18 +753,20 @@ const store = new Vuex.Store({
                 dispatch("SetError", error)
             }
         },
-        UpdateActivityStatus({ state, dispatch }, payload){
-            axios.post("Module/UpdateActivityStatus?ActivityTypeId=" + payload.ActivityTypeId + "&Status=" + payload.Status + "&SessionKey=" + state.SessionKey)
-                .then(() => { dispatch("getActivityTypeList") })
+        async UpdateActivityStatus({ state, dispatch }, payload){
+            try {
+                await axios.post("Module/UpdateActivityStatus?ActivityTypeId=" + payload.ActivityTypeId + "&Status=" + payload.Status + "&SessionKey=" + state.SessionKey)
+                dispatch("getActivityTypeList")
+            } catch (error) {
+                dispatch("SetError", error)
+            }
         },
 
         //Dashboard
         async RecentRequest({ dispatch, commit, state }) {
             try {
                 const response = await axios.get("Dashboard/RecentRequest?SessionKey=" + state.SessionKey)
-                state.RecentRequests.labels = []
-                state.RecentRequests.datasets[0].backgroundColor = []
-                state.RecentRequests.datasets[0].data = []
+                state.RecentRequests.labels, state.RecentRequests.datasets[0].backgroundColor , state.RecentRequests.datasets[0].data = []
                 let data = response.data;
                 
                 commit("updateRecentRequest", data);
@@ -719,9 +778,7 @@ const store = new Vuex.Store({
         async FormerRequest({ dispatch, commit, state }) {
             try {
                 const response = await axios.get("Dashboard/FormerRequest?SessionKey=" + state.SessionKey)
-                state.FormerRequests.labels = []
-                state.FormerRequests.datasets[0].backgroundColor = []
-                state.FormerRequests.datasets[0].data = []
+                state.FormerRequests.labels, state.FormerRequests.datasets[0].backgroundColor , state.FormerRequests.datasets[0].data = []
                 let data = response.data;
 
                 commit("updateFormerRequest", data);
@@ -832,6 +889,11 @@ const store = new Vuex.Store({
                 element.RoleId == RoleId
             )
         },
+        getPrimaryList: state => {
+            // return state.PrimaryUsers.filter(x => x.UserName.includes(value) 
+            //     || x.FirstName.includes(value) || x.LastName.includes(value))
+            return state.PrimaryUsers
+        },
         getModuleData(state){
             return state.ModuleData;
         },
@@ -873,6 +935,11 @@ const store = new Vuex.Store({
         },
         getPossessionStatus(state){
             return state.PossessionStatus;
+        },
+        getPossessionStatusById: state => StatusId => {
+            return state.PossessionStatus.find(element =>
+                element.PossessionStatus == StatusId
+            )
         },
         getPossessionInfo(state){
             return state.PossessionInfo;
