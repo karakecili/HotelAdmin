@@ -25,7 +25,7 @@ Vue.use(IconsPlugin)
 // Vue.use(FormDatepickerPlugin)
 
 Axios.defaults.baseURL = "http://192.168.10.71/HelisAppWebAPI/api"
-// Axios.defaults.baseURL = "http://testwebapi.helisapp.com/api"
+// Axios.defaults.baseURL = "https://testwebapi.helisapp.com/api"
 // Axios.defaults.baseURL = "http://192.168.1.63/HelisAppWebAPI/api"
 // Axios.defaults.baseURL = "http://192.168.1.39/HelisAppWebAPI/api"
 
