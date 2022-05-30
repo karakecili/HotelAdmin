@@ -139,6 +139,10 @@ const store = new Vuex.Store({
             state.ModuleData.push(item);
         },
         updateFields(state, item) {
+            if(item.key == "Details")
+            {
+                item.thClass = "moduleDetails-Details-Header"
+            }
             state.Fields.push(item);
         },
         updateMansions(state, item) {

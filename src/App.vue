@@ -412,4 +412,11 @@
             font-size: 14px;
         }
     }
+    .moduleDetails {
+        &-Details {
+            &-Header {
+                width: 350px;
+            }
+        }
+    }
 </style>

@@ -116,7 +116,7 @@
                         :disabled="isUpdate ? !col.infoEdit : !col.infoNew"
                     ></b-form-input>
                 </b-form-group>
-                <b-form-group 
+                <!-- <b-form-group 
                     :label="col.label" 
                     :label-for="col.key" 
                     :disabled="isUpdate ? !col.infoEdit : !col.infoNew"
@@ -137,7 +137,7 @@
                         @change="fileChange"
                         accept=".jpg, .png"
                     ></b-form-file>
-                </b-form-group>
+                </b-form-group> -->
 
             </div>
     
@@ -228,7 +228,7 @@
                     rows[e.keyValue] = item[e.keyValue]
                 });
                 this.infoModal.row = rows
-                this.infoModal.title = `Row index: ${index + 1}`
+                this.infoModal.title = `Düzenle`
                 this.infoModal.content = JSON.stringify(item, null, 2)
                 this.$root.$emit('bv::show::modal', this.infoModal.id, button)
             },
